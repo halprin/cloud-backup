@@ -13,7 +13,10 @@ func main() {
 		log.Fatal(err.Error())
 	}
 
-	cyphertext := crypt.Encrypt(plaintext, "context string")
+	cyphertext, err := crypt.Encrypt(plaintext)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 
 	err = ioutil.WriteFile(os.Args[2], cyphertext, 0777)
 	if err != nil {
