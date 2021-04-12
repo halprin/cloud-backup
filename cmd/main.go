@@ -8,17 +8,38 @@ import (
 )
 
 func main() {
+	decrypt()
+}
+
+func encrypt() {
 	plaintext, err := ioutil.ReadFile(os.Args[1])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	cyphertext, err := crypt.Encrypt(plaintext)
+	ciphertext, err := crypt.Encrypt(plaintext)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	err = ioutil.WriteFile(os.Args[2], cyphertext, 0777)
+	err = ioutil.WriteFile(os.Args[2], ciphertext, 0777)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func decrypt() {
+	ciphertext, err := ioutil.ReadFile(os.Args[2])
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	plaintext, err := crypt.Decrypt(ciphertext)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = ioutil.WriteFile(os.Args[1], plaintext, 0777)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
