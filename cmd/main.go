@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/halprin/cloud-backup-go/crypt"
-	"io/ioutil"
 	"log"
 	"os"
 )
@@ -13,7 +12,7 @@ func main() {
 }
 
 func encrypt() {
-	plaintext, err := ioutil.ReadFile(os.Args[1])
+	plaintext, err := os.ReadFile(os.Args[1])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -23,14 +22,14 @@ func encrypt() {
 		log.Fatal(err.Error())
 	}
 
-	err = ioutil.WriteFile(os.Args[2], ciphertext, 0777)
+	err = os.WriteFile(os.Args[2], ciphertext, 0777)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 }
 
 func decrypt() {
-	ciphertext, err := ioutil.ReadFile(os.Args[2])
+	ciphertext, err := os.ReadFile(os.Args[2])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -40,7 +39,7 @@ func decrypt() {
 		log.Fatal(err.Error())
 	}
 
-	err = ioutil.WriteFile(os.Args[1], plaintext, 0777)
+	err = os.WriteFile(os.Args[1], plaintext, 0777)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
