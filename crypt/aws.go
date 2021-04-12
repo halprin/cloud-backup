@@ -44,3 +44,29 @@ func getEncryptionKey() (*dataKey, error) {
 
 	return newDataKey, nil
 }
+
+func getDecryptionKey(encryptedDataKey []byte) (*dataKey, error) {
+	if sessionErr != nil {
+		log.Println("Initial AWS session failed")
+		return nil, sessionErr
+	}
+
+	decryptInput := &kms.DecryptInput{
+		CiphertextBlob:    encryptedDataKey,
+		EncryptionContext: map[string]*string{
+			"context": aws.String("a test context string"),
+		},
+	}
+
+	decryptOutput, err := kmsService.Decrypt(decryptInput)
+	if err != nil {
+		return nil, err
+	}
+
+	newDataKey := dataKey{
+		encryptedDataKey: encryptedDataKey,
+		plaintextDataKey: decryptOutput.Plaintext,
+	}
+
+	return &newDataKey, nil
+}
