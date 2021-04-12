@@ -15,17 +15,17 @@ func Decrypt(ciphertext []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	dataKey, err := getDecryptionKey(messageEnvelope.Key)
+	decryptionKey, err := getDecryptionKey(messageEnvelope.Key)
 	if err != nil {
 		return nil, err
 	}
 
-	decryptor, err := createAuthenticatedEncryption(dataKey)
+	decryptor, err := createAuthenticatedEncryption(decryptionKey)
 	if err != nil {
 		return nil, err
 	}
 
-	clearPlaintextDataKey(dataKey)
+	clearPlaintextDataKey(decryptionKey)
 
 	plaintext, err := decryptor.Open(nil, messageEnvelope.Nonce, messageEnvelope.Message, []byte("a test context string"))
 	if err != nil {

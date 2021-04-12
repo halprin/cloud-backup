@@ -9,17 +9,17 @@ import (
 
 func Encrypt(plaintext []byte) ([]byte, error) {
 
-	dataKey, err := getEncryptionKey()
+	encryptionKey, err := getEncryptionKey()
 	if err != nil {
 		return nil, err
 	}
 
-	encryptor, err := createAuthenticatedEncryption(dataKey)
+	encryptor, err := createAuthenticatedEncryption(encryptionKey)
 	if err != nil {
 		return nil, err
 	}
 
-	clearPlaintextDataKey(dataKey)
+	clearPlaintextDataKey(encryptionKey)
 
 	nonce, err := generateNonce(encryptor)
 	if err != nil {
@@ -29,7 +29,7 @@ func Encrypt(plaintext []byte) ([]byte, error) {
 	ciphertext := encryptor.Seal(nil, nonce, plaintext, []byte("a test context string"))
 
 	messageEnvelope := &envelope{
-		Key:     dataKey.encryptedDataKey,
+		Key:     encryptionKey.encryptedDataKey,
 		Nonce:   nonce,
 		Message: ciphertext,
 	}
