@@ -11,11 +11,6 @@ import (
 var awsSession, sessionErr = session.NewSession()
 var kmsService = kms.New(awsSession)
 
-type dataKey struct {
-	encryptedDataKey []byte
-	plaintextDataKey []byte
-}
-
 func getEncryptionKey() (*dataKey, error) {
 	if sessionErr != nil {
 		log.Println("Initial AWS session failed")
