@@ -8,8 +8,8 @@ import (
 )
 
 func main() {
-	//encrypt()
-	decrypt()
+	encrypt()
+	//decrypt()
 }
 
 func encrypt() {

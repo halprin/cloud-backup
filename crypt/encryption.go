@@ -41,7 +41,7 @@ func Encrypt(plaintext []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	return ciphertext, nil
+	return envelopeCipherText.Bytes(), nil
 }
 
 func generateNonce(aead cipher.AEAD) ([]byte, error) {
