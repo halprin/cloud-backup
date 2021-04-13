@@ -19,7 +19,12 @@ func Archive(filePath string) ([]byte, error) {
 			return err
 		}
 
-		err = writeFileMetadataToTar(currentPath, fileMetadata, tarWriter)
+		relativePath, err := filepath.Rel(filePath, currentPath)
+		if err != nil {
+			return err
+		}
+
+		err = writeFileMetadataToTar(relativePath, fileMetadata, tarWriter)
 		if err != nil {
 			return err
 		}
@@ -52,17 +57,17 @@ func writeFileToTar(currentPath string, tarWriter *tar.Writer) error {
 	return err
 }
 
-func writeFileMetadataToTar(currentPath string, fileMetadata fs.DirEntry, tarWriter *tar.Writer) error {
+func writeFileMetadataToTar(relativePath string, fileMetadata fs.DirEntry, tarWriter *tar.Writer) error {
 	fileInfo, err := fileMetadata.Info()
 	if err != nil {
 		return err
 	}
 
-	tarHeader, err := tar.FileInfoHeader(fileInfo, currentPath)
+	tarHeader, err := tar.FileInfoHeader(fileInfo, relativePath)
 	if err != nil {
 		return err
 	}
-	tarHeader.Name = currentPath //because fs.FileInfo's Name method only returns the base name
+	tarHeader.Name = relativePath //because fs.FileInfo's Name method only returns the base name
 
 	err = tarWriter.WriteHeader(tarHeader)
 	return err
