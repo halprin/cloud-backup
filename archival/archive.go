@@ -3,6 +3,7 @@ package archival
 import (
 	"archive/tar"
 	"bytes"
+	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -10,6 +11,8 @@ import (
 )
 
 func Archive(filePath string) ([]byte, error) {
+	parentDirectoryPath := filepath.Dir(filePath)
+
 	byteBuffer := bytes.Buffer{}
 	tarWriter := tar.NewWriter(&byteBuffer)
 	defer tarWriter.Close()
@@ -19,10 +22,13 @@ func Archive(filePath string) ([]byte, error) {
 			return err
 		}
 
-		relativePath, err := filepath.Rel(filePath, currentPath)
+		//get the relative path the tar file doesn't have the entire absolute path but just the relative path from the start of the walk down to the current file
+		relativePath, err := filepath.Rel(parentDirectoryPath, currentPath)
 		if err != nil {
 			return err
 		}
+
+		fmt.Println(relativePath)
 
 		err = writeFileMetadataToTar(relativePath, fileMetadata, tarWriter)
 		if err != nil {
