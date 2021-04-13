@@ -19,18 +19,7 @@ func Archive(filePath string) ([]byte, error) {
 			return err
 		}
 
-		fileInfo, err := fileMetadata.Info()
-		if err != nil {
-			return err
-		}
-
-		tarHeader, err := tar.FileInfoHeader(fileInfo, currentPath)
-		if err != nil {
-			return err
-		}
-		tarHeader.Name = currentPath //because fs.FileInfo's Name method only returns the base name
-
-		err = tarWriter.WriteHeader(tarHeader)
+		err = writeFileMetadataToTar(currentPath, fileMetadata, tarWriter)
 		if err != nil {
 			return err
 		}
@@ -41,18 +30,8 @@ func Archive(filePath string) ([]byte, error) {
 		}
 
 		//it's an actual file
-		fileData, err := os.Open(currentPath)
-		if err != nil {
-			return err
-		}
-		defer fileData.Close()
-
-		_, err = io.Copy(tarWriter, fileData)
-		if err != nil {
-			return err
-		}
-
-		return nil
+		err = writeFileToTar(currentPath, tarWriter)
+		return err
 	})
 
 	if err != nil {
@@ -60,4 +39,31 @@ func Archive(filePath string) ([]byte, error) {
 	}
 
 	return byteBuffer.Bytes(), nil
+}
+
+func writeFileToTar(currentPath string, tarWriter *tar.Writer) error {
+	fileData, err := os.Open(currentPath)
+	if err != nil {
+		return err
+	}
+	defer fileData.Close()
+
+	_, err = io.Copy(tarWriter, fileData)
+	return err
+}
+
+func writeFileMetadataToTar(currentPath string, fileMetadata fs.DirEntry, tarWriter *tar.Writer) error {
+	fileInfo, err := fileMetadata.Info()
+	if err != nil {
+		return err
+	}
+
+	tarHeader, err := tar.FileInfoHeader(fileInfo, currentPath)
+	if err != nil {
+		return err
+	}
+	tarHeader.Name = currentPath //because fs.FileInfo's Name method only returns the base name
+
+	err = tarWriter.WriteHeader(tarHeader)
+	return err
 }
