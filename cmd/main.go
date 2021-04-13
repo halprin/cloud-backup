@@ -1,14 +1,29 @@
 package main
 
 import (
+	"github.com/halprin/cloud-backup-go/archival"
 	"github.com/halprin/cloud-backup-go/crypt"
+	"io/fs"
 	"log"
 	"os"
 )
 
 func main() {
-	encrypt()
+	archive()
+	//encrypt()
 	//decrypt()
+}
+
+func archive() {
+	tarFile, err := archival.Archive(os.Args[1])
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = os.WriteFile(os.Args[2], tarFile, fs.FileMode(777))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 func encrypt() {
