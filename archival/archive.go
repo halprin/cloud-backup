@@ -3,7 +3,6 @@ package archival
 import (
 	"archive/tar"
 	"bytes"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -27,8 +26,6 @@ func Archive(filePath string) ([]byte, error) {
 		if err != nil {
 			return err
 		}
-
-		fmt.Println(relativePath)
 
 		err = writeFileMetadataToTar(relativePath, fileMetadata, tarWriter)
 		if err != nil {
