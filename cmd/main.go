@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	archiveAndCompress()
+	archiveAndCompress2()
 	//encrypt()
 	//decrypt()
 }
@@ -27,6 +27,28 @@ func archiveAndCompress() {
 	}
 
 	err = os.WriteFile(os.Args[2], gzipData, fs.FileMode(777))
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+}
+
+func archiveAndCompress2() {
+
+	outputFile, err := os.Create(os.Args[2])
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	defer outputFile.Close()
+
+	compressor := compression.NewCompressor(outputFile)
+	archiver := archival.NewArchiver(os.Args[1], compressor.Writer())
+
+	err = archiver.Archive()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = compressor.Close()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
