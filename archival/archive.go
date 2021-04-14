@@ -46,6 +46,11 @@ func Archive(filePath string) ([]byte, error) {
 		return nil, err
 	}
 
+	err = tarWriter.Close()
+	if err != nil {
+		return nil, err
+	}
+
 	return byteBuffer.Bytes(), nil
 }
 

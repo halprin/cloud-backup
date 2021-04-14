@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/halprin/cloud-backup-go/archival"
+	"github.com/halprin/cloud-backup-go/compression"
 	"github.com/halprin/cloud-backup-go/crypt"
 	"io/fs"
 	"log"
@@ -9,18 +10,23 @@ import (
 )
 
 func main() {
-	archive()
+	archiveAndCompress()
 	//encrypt()
 	//decrypt()
 }
 
-func archive() {
-	tarFile, err := archival.Archive(os.Args[1])
+func archiveAndCompress() {
+	tarData, err := archival.Archive(os.Args[1])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	err = os.WriteFile(os.Args[2], tarFile, fs.FileMode(777))
+	gzipData, err := compression.Compress(tarData)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	err = os.WriteFile(os.Args[2], gzipData, fs.FileMode(777))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
