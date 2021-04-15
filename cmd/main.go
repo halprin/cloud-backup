@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"github.com/halprin/cloud-backup-go/archival"
 	"github.com/halprin/cloud-backup-go/compression"
 	"github.com/halprin/cloud-backup-go/crypt"
@@ -10,7 +11,7 @@ import (
 )
 
 func main() {
-	archiveAndCompress2()
+	archiveAndCompressAndEncrypt()
 	//encrypt()
 	//decrypt()
 }
@@ -32,7 +33,7 @@ func archiveAndCompress() {
 	}
 }
 
-func archiveAndCompress2() {
+func archiveAndCompressAndEncrypt() {
 
 	outputFile, err := os.Create(os.Args[2])
 	if err != nil {
@@ -40,7 +41,11 @@ func archiveAndCompress2() {
 	}
 	defer outputFile.Close()
 
-	compressor := compression.NewCompressor(outputFile)
+	encryptor := crypt.NewEncryptor(outputFile)
+
+	bufferedWriter := bufio.NewWriterSize(encryptor, 1024 * 1024)
+
+	compressor := compression.NewCompressor(bufferedWriter)
 	archiver := archival.NewArchiver(os.Args[1], compressor.Writer())
 
 	err = archiver.Archive()

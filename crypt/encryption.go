@@ -5,7 +5,28 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/gob"
+	"io"
 )
+
+type encryptor struct {
+	outputWriter io.Writer
+}
+
+func NewEncryptor(outputWriter io.Writer) *encryptor {
+	return &encryptor{
+		outputWriter: outputWriter,
+	}
+}
+
+func (receiver *encryptor) Write(plaintext []byte) (int, error) {
+	cipherText, err := Encrypt(plaintext)
+	if err != nil {
+		return 0, err
+	}
+
+	writtenSize, err := receiver.outputWriter.Write(cipherText)
+	return writtenSize, err
+}
 
 func Encrypt(plaintext []byte) ([]byte, error) {
 
@@ -14,19 +35,19 @@ func Encrypt(plaintext []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	encryptor, err := createAuthenticatedEncryption(encryptionKey)
+	authenticatedEncryption, err := createAuthenticatedEncryption(encryptionKey)
 	if err != nil {
 		return nil, err
 	}
 
 	clearPlaintextDataKey(encryptionKey)
 
-	nonce, err := generateNonce(encryptor)
+	nonce, err := generateNonce(authenticatedEncryption)
 	if err != nil {
 		return nil, err
 	}
 
-	ciphertext := encryptor.Seal(nil, nonce, plaintext, []byte("a test context string"))
+	ciphertext := authenticatedEncryption.Seal(nil, nonce, plaintext, []byte("a test context string"))
 
 	messageEnvelope := &envelope{
 		Key:     encryptionKey.encryptedDataKey,

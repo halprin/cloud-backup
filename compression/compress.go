@@ -7,7 +7,7 @@ import (
 )
 
 type compressor struct {
-	gzipWriter   *gzip.Writer
+	gzipWriter *gzip.Writer
 }
 
 func NewCompressor(outputWriter io.Writer) *compressor {
