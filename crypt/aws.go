@@ -33,8 +33,8 @@ func getEncryptionKey() (*dataKey, error) {
 	}
 
 	newDataKey := &dataKey{
-		encryptedDataKey: generateDataKeyOutput.CiphertextBlob,
-		plaintextDataKey: generateDataKeyOutput.Plaintext,
+		EncryptedDataKey: generateDataKeyOutput.CiphertextBlob,
+		PlaintextDataKey: generateDataKeyOutput.Plaintext,
 	}
 
 	return newDataKey, nil
@@ -59,8 +59,8 @@ func getDecryptionKey(encryptedDataKey []byte) (*dataKey, error) {
 	}
 
 	newDataKey := dataKey{
-		encryptedDataKey: encryptedDataKey,
-		plaintextDataKey: decryptOutput.Plaintext,
+		EncryptedDataKey: encryptedDataKey,
+		PlaintextDataKey: decryptOutput.Plaintext,
 	}
 
 	return &newDataKey, nil

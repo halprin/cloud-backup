@@ -50,7 +50,7 @@ func Encrypt(plaintext []byte) ([]byte, error) {
 	ciphertext := authenticatedEncryption.Seal(nil, nonce, plaintext, []byte("a test context string"))
 
 	messageEnvelope := &envelope{
-		Key:     encryptionKey.encryptedDataKey,
+		Key:     encryptionKey.EncryptedDataKey,
 		Nonce:   nonce,
 		Message: ciphertext,
 	}

@@ -12,12 +12,12 @@ type envelope struct {
 }
 
 type dataKey struct {
-	encryptedDataKey []byte
-	plaintextDataKey []byte
+	EncryptedDataKey []byte
+	PlaintextDataKey []byte
 }
 
 func createAuthenticatedEncryption(dataKey *dataKey) (cipher.AEAD, error) {
-	aesCipher, err := aes.NewCipher(dataKey.plaintextDataKey)
+	aesCipher, err := aes.NewCipher(dataKey.PlaintextDataKey)
 	if err != nil {
 		return nil, err
 	}
@@ -31,11 +31,11 @@ func createAuthenticatedEncryption(dataKey *dataKey) (cipher.AEAD, error) {
 }
 
 func clearPlaintextDataKey(dataKey *dataKey)  {
-	plaintextDataKey := dataKey.plaintextDataKey
+	plaintextDataKey := dataKey.PlaintextDataKey
 
-	for index := 0; index < len(dataKey.plaintextDataKey); index++ {
+	for index := 0; index < len(dataKey.PlaintextDataKey); index++ {
 		plaintextDataKey[index] = 0
 	}
 
-	dataKey.plaintextDataKey = nil  //sets the key to nil which will designate the data to be released via the garbage collector
+	dataKey.PlaintextDataKey = nil //sets the key to nil which will designate the data to be released via the garbage collector
 }

@@ -43,7 +43,7 @@ func archiveAndCompressAndEncrypt() {
 
 	encryptor := crypt.NewEncryptor(outputFile)
 
-	bufferedWriter := bufio.NewWriterSize(encryptor, 1024 * 1024)
+	bufferedWriter := bufio.NewWriterSize(encryptor, 10 * 1024 * 1024)  //buffer in 10 MB increments
 
 	compressor := compression.NewCompressor(bufferedWriter)
 	archiver := archival.NewArchiver(os.Args[1], compressor.Writer())
