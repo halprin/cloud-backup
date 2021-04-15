@@ -7,9 +7,14 @@ import (
 )
 
 func Decrypt(ciphertext []byte) ([]byte, error) {
+	readerForCipherText := bytes.NewReader(ciphertext)
+	gobDecoder := gob.NewDecoder(readerForCipherText)
+
+
+	//TODO: the idea is to do a for loop that loops until the readerForCipherText.Len() is 0.  In the loop, I constantly call gobDecoder.Decode(&messageEnvelope).  I think that might work.
 	var messageEnvelope envelope
 
-	err := gob.NewDecoder(bytes.NewReader(ciphertext)).Decode(&messageEnvelope)
+	err := gobDecoder.Decode(&messageEnvelope)
 	if err != nil {
 		log.Println("this is here")
 		return nil, err
