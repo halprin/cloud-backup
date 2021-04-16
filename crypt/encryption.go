@@ -1,7 +1,6 @@
 package crypt
 
 import (
-	"bytes"
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/gob"
@@ -19,32 +18,31 @@ func NewEncryptor(outputWriter io.Writer) *encryptor {
 }
 
 func (receiver *encryptor) Write(plaintext []byte) (int, error) {
-	cipherText, err := Encrypt(plaintext)
+	err := receiver.encrypt(plaintext)
 	if err != nil {
 		return 0, err
 	}
 
-	writtenSize, err := receiver.outputWriter.Write(cipherText)
-	return writtenSize, err
+	return len(plaintext), nil
 }
 
-func Encrypt(plaintext []byte) ([]byte, error) {
+func (receiver *encryptor) encrypt(plaintext []byte) error {
 
 	encryptionKey, err := getEncryptionKey()
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	authenticatedEncryption, err := createAuthenticatedEncryption(encryptionKey)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	clearPlaintextDataKey(encryptionKey)
 
-	nonce, err := generateNonce(authenticatedEncryption)
+	nonce, err := receiver.generateNonce(authenticatedEncryption)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	ciphertext := authenticatedEncryption.Seal(nil, nonce, plaintext, []byte("a test context string"))
@@ -55,17 +53,11 @@ func Encrypt(plaintext []byte) ([]byte, error) {
 		Message: ciphertext,
 	}
 
-	envelopeCipherText := &bytes.Buffer{}
-
-	err = gob.NewEncoder(envelopeCipherText).Encode(messageEnvelope)
-	if err != nil {
-		return nil, err
-	}
-
-	return envelopeCipherText.Bytes(), nil
+	err = gob.NewEncoder(receiver.outputWriter).Encode(messageEnvelope)
+	return err
 }
 
-func generateNonce(aead cipher.AEAD) ([]byte, error) {
+func (receiver *encryptor) generateNonce(aead cipher.AEAD) ([]byte, error) {
 	nonce := make([]byte, aead.NonceSize())
 
 	_, err := rand.Read(nonce)
