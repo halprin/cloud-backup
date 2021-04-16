@@ -1,7 +1,6 @@
 package compression
 
 import (
-	"bytes"
 	"compress/gzip"
 	"io"
 )
@@ -24,22 +23,4 @@ func (receiver *compressor) Writer() io.Writer {
 func (receiver *compressor) Close() error {
 	err := receiver.gzipWriter.Close()
 	return err
-}
-
-func Compress(contentToCompress []byte) ([]byte, error) {
-	byteBuffer := bytes.Buffer{}
-	gzipWriter := gzip.NewWriter(&byteBuffer)
-	defer gzipWriter.Close()
-
-	_, err := gzipWriter.Write(contentToCompress)
-	if err != nil {
-		return nil, err
-	}
-
-	err = gzipWriter.Close()
-	if err != nil {
-		return nil, err
-	}
-
-	return byteBuffer.Bytes(), nil
 }
