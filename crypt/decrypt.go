@@ -1,42 +1,55 @@
 package crypt
 
 import (
-	"bytes"
 	"encoding/gob"
+	"io"
 )
 
-func Decrypt(ciphertext []byte) ([]byte, error) {
-	readerForCipherText := bytes.NewReader(ciphertext)
-	var totalPlaintext []byte
+type decryptor struct {
+	inputReader  io.Reader
+	outputWriter io.Writer
+}
 
-	for readerForCipherText.Len() > 0 {
+func NewDecryptor(inputReader io.Reader, outputWriter io.Writer) *decryptor {
+	return &decryptor{
+		inputReader: inputReader,
+		outputWriter: outputWriter,
+	}
+}
+
+func (receiver *decryptor) Decrypt() error {
+	for {
 		var messageEnvelope envelope
 
-		gobDecoder := gob.NewDecoder(readerForCipherText)
+		gobDecoder := gob.NewDecoder(receiver.inputReader)
 		err := gobDecoder.Decode(&messageEnvelope)
-		if err != nil {
-			return nil, err
+		if err == io.EOF {
+			//we've exhausted the reader; end decrypting successfully
+			return nil
+		} else if err != nil {
+			return err
 		}
 
 		decryptionKey, err := getDecryptionKey(messageEnvelope.Key)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		decryptor, err := createAuthenticatedEncryption(decryptionKey)
+		authenticatedEncryption, err := createAuthenticatedEncryption(decryptionKey)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
 		clearPlaintextDataKey(decryptionKey)
 
-		plaintext, err := decryptor.Open(nil, messageEnvelope.Nonce, messageEnvelope.Message, []byte("a test context string"))
+		plaintext, err := authenticatedEncryption.Open(nil, messageEnvelope.Nonce, messageEnvelope.Message, []byte("a test context string"))
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		totalPlaintext = append(totalPlaintext, plaintext...)
+		_, err = receiver.outputWriter.Write(plaintext)
+		if err != nil {
+			return err
+		}
 	}
-
-	return totalPlaintext, nil
 }

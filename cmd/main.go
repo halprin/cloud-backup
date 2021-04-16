@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	archiveAndCompressAndEncrypt()
+	//archiveAndCompressAndEncrypt()
 	decrypt()
 }
 
@@ -46,18 +46,23 @@ func archiveAndCompressAndEncrypt() {
 }
 
 func decrypt() {
-	ciphertext, err := os.ReadFile(os.Args[1])
+	ciphertextFile, err := os.Open(os.Args[1])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	defer ciphertextFile.Close()
 
-	plaintext, err := crypt.Decrypt(ciphertext)
+	outputFile, err := os.Create(os.Args[2])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+	defer outputFile.Close()
 
-	err = os.WriteFile(os.Args[2], plaintext, 0777)
+	decryptor := crypt.NewDecryptor(ciphertextFile, outputFile)
+
+	err = decryptor.Decrypt()
 	if err != nil {
+		log.Println("decrypt")
 		log.Fatal(err.Error())
 	}
 }
