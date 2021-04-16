@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"github.com/halprin/cloud-backup-go/archival"
 	"github.com/halprin/cloud-backup-go/compression"
+	"github.com/halprin/cloud-backup-go/config"
 	"github.com/halprin/cloud-backup-go/crypt"
 	"log"
 	"os"
@@ -11,7 +12,17 @@ import (
 
 func main() {
 	//archiveAndCompressAndEncrypt()
-	decrypt()
+	//decrypt()
+	configuration()
+}
+
+func configuration() {
+	theConfig, err := config.BackupConfig()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+
+	log.Println(theConfig.S3Bucket)
 }
 
 func archiveAndCompressAndEncrypt() {
