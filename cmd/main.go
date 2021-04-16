@@ -11,9 +11,8 @@ import (
 )
 
 func main() {
-	archiveAndCompressAndEncrypt()
-	//encrypt()
-	//decrypt()
+	//archiveAndCompressAndEncrypt()
+	decrypt()
 }
 
 func archiveAndCompress() {
@@ -57,6 +56,11 @@ func archiveAndCompressAndEncrypt() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
+
+	err = bufferedWriter.Flush()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
 
 func encrypt() {
@@ -77,7 +81,7 @@ func encrypt() {
 }
 
 func decrypt() {
-	ciphertext, err := os.ReadFile(os.Args[2])
+	ciphertext, err := os.ReadFile(os.Args[1])
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -87,7 +91,7 @@ func decrypt() {
 		log.Fatal(err.Error())
 	}
 
-	err = os.WriteFile(os.Args[1], plaintext, 0777)
+	err = os.WriteFile(os.Args[2], plaintext, 0777)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
