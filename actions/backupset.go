@@ -53,7 +53,7 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 	}
 	defer outputFile.Close()
 
-	encryptor := crypt.NewEncryptor(outputFile)
+	encryptor := crypt.NewEncryptor(outputFile, overallConfig)
 
 	bufferedWriter := bufio.NewWriterSize(encryptor, 10 * 1024 * 1024)  //buffer in 10 MB increments
 

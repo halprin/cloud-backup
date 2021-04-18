@@ -2,18 +2,21 @@ package crypt
 
 import (
 	"encoding/gob"
+	"github.com/halprin/cloud-backup-go/config"
 	"io"
 )
 
 type decryptor struct {
 	inputReader  io.Reader
 	outputWriter io.Writer
+	config config.BackupConfiguration
 }
 
-func NewDecryptor(inputReader io.Reader, outputWriter io.Writer) *decryptor {
+func NewDecryptor(inputReader io.Reader, outputWriter io.Writer, config config.BackupConfiguration) *decryptor {
 	return &decryptor{
 		inputReader: inputReader,
 		outputWriter: outputWriter,
+		config: config,
 	}
 }
 
@@ -30,7 +33,7 @@ func (receiver *decryptor) Decrypt() error {
 			return err
 		}
 
-		decryptionKey, err := getDecryptionKey(messageEnvelope.Key)
+		decryptionKey, err := getDecryptionKey(messageEnvelope.Key, receiver.config.EncryptionContext, receiver.config.AwsProfile)
 		if err != nil {
 			return err
 		}

@@ -4,16 +4,19 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/gob"
+	"github.com/halprin/cloud-backup-go/config"
 	"io"
 )
 
 type encryptor struct {
 	outputWriter io.Writer
+	config config.BackupConfiguration
 }
 
-func NewEncryptor(outputWriter io.Writer) *encryptor {
+func NewEncryptor(outputWriter io.Writer, config config.BackupConfiguration) *encryptor {
 	return &encryptor{
 		outputWriter: outputWriter,
+		config: config,
 	}
 }
 
@@ -28,7 +31,7 @@ func (receiver *encryptor) Write(plaintext []byte) (int, error) {
 
 func (receiver *encryptor) encrypt(plaintext []byte) error {
 
-	encryptionKey, err := getEncryptionKey()
+	encryptionKey, err := getEncryptionKey(receiver.config.KmsKey, receiver.config.EncryptionContext, receiver.config.AwsProfile)
 	if err != nil {
 		return err
 	}

@@ -5,25 +5,19 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
 	"log"
-	"os"
 )
 
-var awsSession, sessionErr = session.NewSession()
-var kmsService = kms.New(awsSession)
-
-func getEncryptionKey() (*dataKey, error) {
-	if sessionErr != nil {
-		log.Println("Initial AWS session failed")
-		return nil, sessionErr
+func getEncryptionKey(kmsKeyArn string, encryptionContext string, awsProfile string) (*dataKey, error) {
+	kmsService, err := getKmsClient(awsProfile)
+	if err != nil {
+		return nil, err
 	}
-
-	kmsKeyArn := os.Args[3]
 
 	generateDataKeyInput := &kms.GenerateDataKeyInput{
 		KeyId:             &kmsKeyArn,
 		KeySpec:           aws.String(kms.DataKeySpecAes256),
 		EncryptionContext: map[string]*string{
-			"context": aws.String("a test context string"),
+			"context": &encryptionContext,
 		},
 	}
 
@@ -40,16 +34,16 @@ func getEncryptionKey() (*dataKey, error) {
 	return newDataKey, nil
 }
 
-func getDecryptionKey(encryptedDataKey []byte) (*dataKey, error) {
-	if sessionErr != nil {
-		log.Println("Initial AWS session failed")
-		return nil, sessionErr
+func getDecryptionKey(encryptedDataKey []byte, encryptionContext string, awsProfile string) (*dataKey, error) {
+	kmsService, err := getKmsClient(awsProfile)
+	if err != nil {
+		return nil, err
 	}
 
 	decryptInput := &kms.DecryptInput{
 		CiphertextBlob:    encryptedDataKey,
 		EncryptionContext: map[string]*string{
-			"context": aws.String("a test context string"),
+			"context": &encryptionContext,
 		},
 	}
 
@@ -64,4 +58,18 @@ func getDecryptionKey(encryptedDataKey []byte) (*dataKey, error) {
 	}
 
 	return &newDataKey, nil
+}
+
+func getKmsClient(awsProfile string) (*kms.KMS, error) {
+	awsSession, err := session.NewSessionWithOptions(session.Options{
+		Profile: awsProfile,
+	})
+	if err != nil {
+		log.Println("Initial AWS session failed")
+		return nil, err
+	}
+
+	kmsService := kms.New(awsSession)
+
+	return kmsService, nil
 }
