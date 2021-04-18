@@ -9,6 +9,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sync"
 )
 
 func Backup() error {
@@ -19,18 +20,19 @@ func Backup() error {
 		return err
 	}
 
+	waitGroup := &sync.WaitGroup{}
 	for _, currentBackupFile := range overallConfig.BackupFiles {
-		err = backupFile(currentBackupFile, overallConfig)
-		if err != nil {
-			return err
-		}
+		waitGroup.Add(1)
+		go backupFile(currentBackupFile, overallConfig, waitGroup)
 	}
+
+	waitGroup.Wait()
 
 	log.Println("Backing-up file set complete")
 	return nil
 }
 
-func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration) error {
+func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration, waitGroup *sync.WaitGroup) error {
 	log.Printf("Backing-up %s (%s)", backupFile.Title, backupFile.Path)
 
 	outputFile, err := os.Create(path.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
@@ -62,5 +64,6 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 	}
 
 	log.Printf("Back-up complete for %s", backupFile.Title)
+	waitGroup.Done()
 	return nil
 }
