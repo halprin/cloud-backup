@@ -6,10 +6,10 @@ import (
 	"github.com/halprin/cloud-backup-go/compression"
 	"github.com/halprin/cloud-backup-go/config"
 	"github.com/halprin/cloud-backup-go/crypt"
+	"github.com/halprin/cloud-backup-go/parallel"
 	"log"
 	"os"
 	"path"
-	"sync"
 )
 
 func Backup() error {
@@ -20,19 +20,31 @@ func Backup() error {
 		return err
 	}
 
-	waitGroup := &sync.WaitGroup{}
+	var errorChannels []chan error
+
 	for _, currentBackupFile := range overallConfig.BackupFiles {
-		waitGroup.Add(1)
-		go backupFile(currentBackupFile, overallConfig, waitGroup)
+		var errorChannel chan error
+
+		func(currentBackupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration) {
+			errorChannel = parallel.InvokeErrorReturnFunction(func() error {
+				return backupFile(currentBackupFile, overallConfig)
+			})
+		}(currentBackupFile, overallConfig)
+
+		errorChannels = append(errorChannels, errorChannel)
 	}
 
-	waitGroup.Wait()
+	for _, errorFromBackupFile := range parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels) {
+		if errorFromBackupFile != nil {
+			return errorFromBackupFile
+		}
+	}
 
 	log.Println("Backing-up file set complete")
 	return nil
 }
 
-func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration, waitGroup *sync.WaitGroup) error {
+func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration) error {
 	log.Printf("Backing-up %s (%s)", backupFile.Title, backupFile.Path)
 
 	outputFile, err := os.Create(path.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
@@ -50,20 +62,22 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 
 	err = archiver.Archive()
 	if err != nil {
+		log.Printf("Unable to archive %s", backupFile.Title)
 		return err
 	}
 
 	err = compressor.Close()
 	if err != nil {
+		log.Printf("Unable finish the compression of %s", backupFile.Title)
 		return err
 	}
 
 	err = bufferedWriter.Flush()
 	if err != nil {
+		log.Printf("Unable to finish the buffering of %s", backupFile.Title)
 		return err
 	}
 
 	log.Printf("Back-up complete for %s", backupFile.Title)
-	waitGroup.Done()
 	return nil
 }
