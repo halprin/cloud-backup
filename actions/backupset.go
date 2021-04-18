@@ -9,7 +9,7 @@ import (
 	"github.com/halprin/cloud-backup-go/parallel"
 	"log"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 func Backup() error {
@@ -47,7 +47,7 @@ func Backup() error {
 func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration) error {
 	log.Printf("Backing-up %s (%s)", backupFile.Title, backupFile.Path)
 
-	outputFile, err := os.Create(path.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
+	outputFile, err := os.Create(filepath.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 	bufferedWriter := bufio.NewWriterSize(encryptor, 10 * 1024 * 1024)  //buffer in 10 MB increments
 
 	compressor := compression.NewCompressor(bufferedWriter)
-	archiver := archival.NewArchiver(backupFile.Path, compressor.Writer())
+	archiver := archival.NewArchiver(backupFile.Path, compressor.Writer(), backupFile)
 
 	err = archiver.Archive()
 	if err != nil {
