@@ -45,7 +45,7 @@ func (receiver *decryptor) Decrypt() error {
 
 		clearPlaintextDataKey(decryptionKey)
 
-		plaintext, err := authenticatedEncryption.Open(nil, messageEnvelope.Nonce, messageEnvelope.Message, []byte("a test context string"))
+		plaintext, err := authenticatedEncryption.Open(nil, messageEnvelope.Nonce, messageEnvelope.Message, []byte(receiver.config.EncryptionContext))
 		if err != nil {
 			return err
 		}

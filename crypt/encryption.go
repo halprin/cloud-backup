@@ -48,7 +48,7 @@ func (receiver *encryptor) encrypt(plaintext []byte) error {
 		return err
 	}
 
-	ciphertext := authenticatedEncryption.Seal(nil, nonce, plaintext, []byte("a test context string"))
+	ciphertext := authenticatedEncryption.Seal(nil, nonce, plaintext, []byte(receiver.config.EncryptionContext))
 
 	messageEnvelope := &envelope{
 		Key:     encryptionKey.EncryptedDataKey,
