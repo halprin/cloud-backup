@@ -11,8 +11,8 @@ import (
 )
 
 type archiver struct {
-	filePath  string
-	tarWriter *tar.Writer
+	filePath   string
+	tarWriter  *tar.Writer
 	fileConfig config.BackupFileConfiguration
 }
 

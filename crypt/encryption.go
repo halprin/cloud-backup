@@ -10,7 +10,7 @@ import (
 
 type encryptor struct {
 	outputWriter io.Writer
-	config config.BackupConfiguration
+	config       config.BackupConfiguration
 }
 
 func NewEncryptor(outputWriter io.Writer, config config.BackupConfiguration) *encryptor {
