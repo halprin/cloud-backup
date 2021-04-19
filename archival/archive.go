@@ -54,8 +54,8 @@ func (receiver *archiver) Archive() error {
 			return err
 		}
 
-		if fileMetadata.IsDir() {
-			//we're done if this is just a directory
+		if !fileMetadata.Type().IsRegular() {
+			//we're done if this is just a directory, symlink, or some non-regular file
 			return nil
 		}
 
