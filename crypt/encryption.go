@@ -9,8 +9,11 @@ import (
 )
 
 type encryptor struct {
-	outputWriter io.Writer
-	config       config.BackupConfiguration
+	outputWriter            io.Writer
+	config                  config.BackupConfiguration
+
+	authenticatedEncryption cipher.AEAD
+	encryptedDataKey        []byte
 }
 
 func NewEncryptor(outputWriter io.Writer, config config.BackupConfiguration) *encryptor {
@@ -31,27 +34,32 @@ func (receiver *encryptor) Write(plaintext []byte) (int, error) {
 
 func (receiver *encryptor) encrypt(plaintext []byte) error {
 
-	encryptionKey, err := getEncryptionKey(receiver.config.KmsKey, receiver.config.EncryptionContext, receiver.config.AwsProfile)
+	if receiver.authenticatedEncryption == nil || len(receiver.encryptedDataKey) == 0 {
+		encryptionKey, err := getEncryptionKey(receiver.config.KmsKey, receiver.config.EncryptionContext, receiver.config.AwsProfile)
+		if err != nil {
+			return err
+		}
+
+		receiver.encryptedDataKey = encryptionKey.EncryptedDataKey
+
+		authenticatedEncryption, err := createAuthenticatedEncryption(encryptionKey)
+		if err != nil {
+			return err
+		}
+		receiver.authenticatedEncryption = authenticatedEncryption
+
+		clearPlaintextDataKey(encryptionKey)
+	}
+
+	nonce, err := receiver.generateNonce(receiver.authenticatedEncryption)
 	if err != nil {
 		return err
 	}
 
-	authenticatedEncryption, err := createAuthenticatedEncryption(encryptionKey)
-	if err != nil {
-		return err
-	}
-
-	clearPlaintextDataKey(encryptionKey)
-
-	nonce, err := receiver.generateNonce(authenticatedEncryption)
-	if err != nil {
-		return err
-	}
-
-	ciphertext := authenticatedEncryption.Seal(nil, nonce, plaintext, []byte(receiver.config.EncryptionContext))
+	ciphertext := receiver.authenticatedEncryption.Seal(nil, nonce, plaintext, []byte(receiver.config.EncryptionContext))
 
 	messageEnvelope := &envelope{
-		Key:     encryptionKey.EncryptedDataKey,
+		Key:     receiver.encryptedDataKey,
 		Nonce:   nonce,
 		Message: ciphertext,
 	}
