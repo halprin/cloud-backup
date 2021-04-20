@@ -49,7 +49,7 @@ func (receiver *archiver) Archive() error {
 			return err
 		}
 
-		err = receiver.writeFileMetadataToTar(relativePath, fileMetadata)
+		err = receiver.writeFileMetadataToTar(currentPath, relativePath, fileMetadata)
 		if err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func (receiver *archiver) shouldSkipArchival(filePath string) bool {
 	return matches
 }
 
-func (receiver *archiver) writeFileMetadataToTar(relativePath string, fileMetadata fs.DirEntry) error {
+func (receiver *archiver) writeFileMetadataToTar(fullPath string, relativePath string, fileMetadata fs.DirEntry) error {
 	fileInfo, err := fileMetadata.Info()
 	if err != nil {
 		return err
@@ -101,8 +101,21 @@ func (receiver *archiver) writeFileMetadataToTar(relativePath string, fileMetada
 	}
 	tarHeader.Name = relativePath //because fs.FileInfo's Name method only returns the base name
 
+	if receiver.isSymlink(fileMetadata) {
+		linkTarget, err := os.Readlink(fullPath)
+		if err != nil {
+			return err
+		}
+
+		tarHeader.Linkname = linkTarget
+	}
+
 	err = receiver.tarWriter.WriteHeader(tarHeader)
 	return err
+}
+
+func (receiver *archiver) isSymlink(fileMetadata fs.DirEntry) bool {
+	return fileMetadata.Type() & fs.ModeSymlink != 0
 }
 
 func (receiver *archiver) writeFileToTar(currentPath string) error {
