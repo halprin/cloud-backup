@@ -7,9 +7,8 @@ import (
 	"github.com/halprin/cloud-backup-go/config"
 	"github.com/halprin/cloud-backup-go/crypt"
 	"github.com/halprin/cloud-backup-go/parallel"
+	"github.com/halprin/cloud-backup-go/transfer"
 	"log"
-	"os"
-	"path/filepath"
 )
 
 func Backup() error {
@@ -20,6 +19,8 @@ func Backup() error {
 		return err
 	}
 
+	overallFolderName := "GoLangTest"
+
 	var errorChannels []chan error
 
 	for _, currentBackupFile := range overallConfig.BackupFiles {
@@ -27,7 +28,7 @@ func Backup() error {
 
 		func(currentBackupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration) {
 			errorChannel = parallel.InvokeErrorReturnFunction(func() error {
-				return backupFile(currentBackupFile, overallConfig)
+				return backupFile(currentBackupFile, overallConfig, overallFolderName)
 			})
 		}(currentBackupFile, overallConfig)
 
@@ -44,16 +45,21 @@ func Backup() error {
 	return nil
 }
 
-func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration) error {
+func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) error {
 	log.Printf("Backing-up %s (%s)", backupFile.Title, backupFile.Path)
 
-	outputFile, err := os.Create(filepath.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
+	//outputFile, err := os.Create(filepath.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
+	//if err != nil {
+	//	return err
+	//}
+	//defer outputFile.Close()
+
+	uploader, err := transfer.NewUploader(backupFile, overallConfig, overallFolderName)
 	if err != nil {
 		return err
 	}
-	defer outputFile.Close()
 
-	encryptor := crypt.NewEncryptor(outputFile, overallConfig)
+	encryptor := crypt.NewEncryptor(uploader, overallConfig)
 
 	bufferedWriter := bufio.NewWriterSize(encryptor, 10 * 1024 * 1024)  //buffer in 10 MB increments
 

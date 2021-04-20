@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	//backupSet()
-	decrypt()
+	backupSet()
+	//decrypt()
 }
 
 func backupSet() {
