@@ -9,6 +9,7 @@ import (
 	"github.com/halprin/cloud-backup-go/parallel"
 	"github.com/halprin/cloud-backup-go/transfer"
 	"log"
+	"time"
 )
 
 func Backup() error {
@@ -19,7 +20,8 @@ func Backup() error {
 		return err
 	}
 
-	overallFolderName := "GoLangTest"
+	nowTime := time.Now()
+	overallFolderName := nowTime.Format(time.RFC3339)
 
 	var errorChannels []chan error
 
