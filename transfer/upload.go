@@ -11,11 +11,10 @@ import (
 )
 
 type uploader struct {
-	overallFolderName string
-	fileName   string
-	pipeWriter *io.PipeWriter
-	pipeReader *io.PipeReader
-	s3Uploader *s3manager.Uploader
+	pipeWriter  *io.PipeWriter
+	pipeReader  *io.PipeReader
+	s3Uploader  *s3manager.Uploader
+	uploadInput *s3manager.UploadInput
 }
 
 func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) (*uploader, error) {
@@ -26,28 +25,37 @@ func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config
 		return nil, err
 	}
 
-	upParams := &s3manager.UploadInput{
+	uploadInput := &s3manager.UploadInput{
 		Bucket: &overallConfig.S3Bucket,
 		Key:    aws.String(path.Join(overallFolderName, fileConfig.Title + ".cipher")),
 		Body:   pipeReader,
 	}
 
-	_, err = s3Uploader.Upload(upParams)
-	if err != nil {
-		return nil, err
-	}
-
-	return &uploader{
-		overallFolderName: overallFolderName,
-		fileName: fileConfig.Title,
+	newUploader := &uploader{
 		pipeWriter: pipeWriter,
 		pipeReader: pipeReader,
 		s3Uploader: s3Uploader,
-	}, nil
+		uploadInput: uploadInput,
+	}
+
+	go newUploader.initiateUpload()
+
+	return newUploader, nil
 }
 
 func (receiver *uploader) Write(inputBytes []byte) (int, error) {
 	return receiver.pipeWriter.Write(inputBytes)
+}
+
+func (receiver *uploader) Close() error {
+	return receiver.pipeWriter.Close()
+}
+
+func (receiver *uploader) initiateUpload() {
+	_, err := receiver.s3Uploader.Upload(receiver.uploadInput)
+	if err != nil {
+		_ = receiver.pipeReader.CloseWithError(err)
+	}
 }
 
 func getUploader(awsProfile string) (*s3manager.Uploader, error) {

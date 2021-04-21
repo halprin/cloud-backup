@@ -9,6 +9,7 @@ import (
 	"github.com/halprin/cloud-backup-go/parallel"
 	"github.com/halprin/cloud-backup-go/transfer"
 	"log"
+	"time"
 )
 
 func Backup() error {
@@ -83,6 +84,14 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 		log.Printf("Unable to finish the buffering of %s", backupFile.Title)
 		return err
 	}
+
+	err = uploader.Close()
+	if err != nil {
+		log.Printf("Unable to finish the upload of %s", backupFile.Title)
+		return err
+	}
+
+	time.Sleep(10 * time.Second)
 
 	log.Printf("Back-up complete for %s", backupFile.Title)
 	return nil
