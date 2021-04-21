@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"path"
+	"sync"
 )
 
 type uploader struct {
@@ -15,6 +16,7 @@ type uploader struct {
 	pipeReader  *io.PipeReader
 	s3Uploader  *s3manager.Uploader
 	uploadInput *s3manager.UploadInput
+	waitGroup   sync.WaitGroup
 }
 
 func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) (*uploader, error) {
@@ -36,8 +38,10 @@ func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config
 		pipeReader: pipeReader,
 		s3Uploader: s3Uploader,
 		uploadInput: uploadInput,
+		waitGroup: sync.WaitGroup{},
 	}
 
+	newUploader.waitGroup.Add(1)
 	go newUploader.initiateUpload()
 
 	return newUploader, nil
@@ -48,7 +52,10 @@ func (receiver *uploader) Write(inputBytes []byte) (int, error) {
 }
 
 func (receiver *uploader) Close() error {
-	return receiver.pipeWriter.Close()
+	err := receiver.pipeWriter.Close()
+	receiver.waitGroup.Wait()
+
+	return err
 }
 
 func (receiver *uploader) initiateUpload() {
@@ -56,6 +63,8 @@ func (receiver *uploader) initiateUpload() {
 	if err != nil {
 		_ = receiver.pipeReader.CloseWithError(err)
 	}
+
+	receiver.waitGroup.Done()
 }
 
 func getUploader(awsProfile string) (*s3manager.Uploader, error) {
