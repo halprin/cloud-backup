@@ -77,5 +77,8 @@ func getUploader(awsProfile string) (*s3manager.Uploader, error) {
 	}
 
 	newUploader := s3manager.NewUploader(awsSession)
+	//allows up to 195.3125 GB
+	newUploader.PartSize = 1024 * 1024 * 20
+
 	return newUploader, nil
 }
