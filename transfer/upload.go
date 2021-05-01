@@ -4,6 +4,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/halprin/cloud-backup-go/aws/myS3Manager"
 	"github.com/halprin/cloud-backup-go/config"
 	"io"
 	"log"
@@ -14,7 +15,7 @@ import (
 type uploader struct {
 	pipeWriter  *io.PipeWriter
 	pipeReader  *io.PipeReader
-	s3Uploader  *s3manager.Uploader
+	s3Uploader  *myS3Manager.Uploader
 	uploadInput *s3manager.UploadInput
 	waitGroup   sync.WaitGroup
 }
@@ -34,11 +35,11 @@ func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config
 	}
 
 	newUploader := &uploader{
-		pipeWriter: pipeWriter,
-		pipeReader: pipeReader,
-		s3Uploader: s3Uploader,
+		pipeWriter:  pipeWriter,
+		pipeReader:  pipeReader,
+		s3Uploader:  s3Uploader,
 		uploadInput: uploadInput,
-		waitGroup: sync.WaitGroup{},
+		waitGroup:   sync.WaitGroup{},
 	}
 
 	newUploader.waitGroup.Add(1)
@@ -59,7 +60,7 @@ func (receiver *uploader) Close() error {
 }
 
 func (receiver *uploader) initiateUpload() {
-	_, err := receiver.s3Uploader.Upload(receiver.uploadInput)
+	err := receiver.s3Uploader.Upload(receiver.uploadInput)
 	if err != nil {
 		_ = receiver.pipeReader.CloseWithError(err)
 	}
@@ -67,7 +68,7 @@ func (receiver *uploader) initiateUpload() {
 	receiver.waitGroup.Done()
 }
 
-func getUploader(awsProfile string) (*s3manager.Uploader, error) {
+func getUploader(awsProfile string) (*myS3Manager.Uploader, error) {
 	awsSession, err := session.NewSessionWithOptions(session.Options{
 		Profile: awsProfile,
 	})
@@ -76,9 +77,7 @@ func getUploader(awsProfile string) (*s3manager.Uploader, error) {
 		return nil, err
 	}
 
-	newUploader := s3manager.NewUploader(awsSession)
-	//allows up to 195.3125 GB
-	newUploader.PartSize = 1024 * 1024 * 20
+	newUploader := myS3Manager.NewUploader(awsSession)
 
 	return newUploader, nil
 }
