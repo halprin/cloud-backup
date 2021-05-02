@@ -42,7 +42,7 @@ func decrypt() {
 
 	err = decryptor.Decrypt()
 	if err != nil {
-		log.Println("decrypt")
+		log.Println("decrypt error")
 		log.Fatal(err.Error())
 	}
 }

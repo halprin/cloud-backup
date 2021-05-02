@@ -5,10 +5,19 @@ import (
 	"crypto/cipher"
 )
 
-type envelope struct {
-	Key     []byte
-	Nonce   []byte
-	Message []byte
+type preamble struct {
+	Version string
+}
+
+const PreambleVersion = "1.0.0"
+
+type v100Preamble struct {
+	EncryptedDataKey []byte
+}
+
+type v100Envelope struct {
+	Nonce      []byte
+	CipherText []byte
 }
 
 type dataKey struct {
