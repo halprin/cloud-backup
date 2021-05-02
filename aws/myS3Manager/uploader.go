@@ -81,19 +81,23 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 
 func (receiver *Uploader) uploadPart(partNumber int64, partSize int64) (*s3.CompletedPart, error) {
 	log.Printf("Upload part %d using part size %d", partNumber, partSize)
-	//read in partSize amount of bytes
-	partBytes := make([]byte, partSize)
-	_, err := receiver.body.Read(partBytes)
-	if err != nil {
+	//read up to partSize amount of bytes
+	fullPartBytes := make([]byte, partSize)
+
+	partBytesRead, err := io.ReadFull(receiver.body, fullPartBytes)  //ReadFull to try to fill the full size of partSize
+	if err != nil && err != io.ErrUnexpectedEOF {
 		return nil, err
 	}
+
+	//possible that the last read returns less than a full partSize, so we need to slice the bytes to the read size
+	partBytes := fullPartBytes[:partBytesRead]
 
 	md5Hash := calculateMd5Hash(partBytes)
 
 	partInput := &s3.UploadPartInput{
 		Body:          bytes.NewReader(partBytes),
 		Bucket:        receiver.multipartUploadData.Bucket,
-		ContentLength: &partSize,
+		ContentLength: aws.Int64(int64(partBytesRead)),
 		ContentMD5:    aws.String(md5Hash),
 		Key:           receiver.multipartUploadData.Key,
 		PartNumber:    &partNumber,
