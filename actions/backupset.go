@@ -7,9 +7,8 @@ import (
 	"github.com/halprin/cloud-backup-go/config"
 	"github.com/halprin/cloud-backup-go/crypt"
 	"github.com/halprin/cloud-backup-go/parallel"
+	"github.com/halprin/cloud-backup-go/transfer"
 	"log"
-	"os"
-	"path/filepath"
 	"time"
 )
 
@@ -51,17 +50,18 @@ func Backup() error {
 func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) error {
 	log.Printf("Backing-up %s (%s)", backupFile.Title, backupFile.Path)
 
-	outputFile, err := os.Create(filepath.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
+	//outputFile, err := os.Create(filepath.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
+	//if err != nil {
+	//	return err
+	//}
+	//defer outputFile.Close()
+
+	uploader, err := transfer.NewUploader(backupFile, overallConfig, overallFolderName)
 	if err != nil {
 		return err
 	}
 
-	//uploader, err := transfer.NewUploader(backupFile, overallConfig, overallFolderName)
-	//if err != nil {
-	//	return err
-	//}
-
-	encryptor := crypt.NewEncryptor(outputFile, overallConfig)
+	encryptor := crypt.NewEncryptor(uploader, overallConfig)
 
 	bufferedWriter := bufio.NewWriterSize(encryptor, 10 * 1024 * 1024)  //buffer in 10 MB increments
 
@@ -86,15 +86,9 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 		return err
 	}
 
-	//err = uploader.Close()
-	//if err != nil {
-	//	log.Printf("Unable to finish the upload of %s", backupFile.Title)
-	//	return err
-	//}
-
-	err = outputFile.Close()
+	err = uploader.Close()
 	if err != nil {
-		log.Printf("Unable to finish the writing of %s", backupFile.Title)
+		log.Printf("Unable to finish the upload of %s", backupFile.Title)
 		return err
 	}
 
