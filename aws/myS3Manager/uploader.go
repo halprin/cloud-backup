@@ -8,8 +8,8 @@ import (
 	"github.com/aws/aws-sdk-go/aws/client"
 	"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/halprin/cloud-backup-go/parallel"
 	"io"
-	"log"
 	"time"
 )
 
@@ -61,26 +61,70 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 	partSize := int64(5 * 1024 * 1024)  //start at 5 MB
 	numberOfIterationsPerPartSize := 909
 	partNumber := int64(1)
-	var completedParts []*s3.CompletedPart
+	var completedPartChannels []chan *s3.CompletedPart
+	var errorChannels []chan error
+
+	poolSize := 5
+	taskQueueSize := poolSize * 2
+	pool := parallel.NewPool(poolSize, taskQueueSize)
+	defer pool.Release()
 
 	for ; ; partSize*=2 {
 		for partIndex := 0; partIndex < numberOfIterationsPerPartSize; partIndex++ {
-			completedPart, err := receiver.uploadPart(partNumber, partSize)
+
+			partBytes, err := receiver.readPart(partSize)
 			if err != nil {
 				if err == io.EOF {
-					return completedParts, nil
+					//log.Println("EOF")
+					//we're done reading, check the upload error channels first before we call this a success
+					errors := parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels)
+					for _, err = range errors {
+						if err != nil {
+							return nil, err
+						}
+					}
+					//no upload errors, so return the completed parts
+					return parallel.ConvertChannelsOfCompletedPartsToSlice(completedPartChannels), nil
 				}
 				return nil, err
 			}
 
+			//check upload errors every taskQueueSize times
+			if partNumber % int64(taskQueueSize) == 0 {
+				//log.Println("Checking upload errors")
+				errors := parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels)
+				for _, err = range errors {
+					if err != nil {
+						return nil, err
+					}
+				}
+				errorChannels = make([]chan error, 0, taskQueueSize)
+			}
+
+			errorChannel := make(chan error, 1)
+			errorChannels = append(errorChannels, errorChannel)
+			completedPartChannel := make(chan *s3.CompletedPart, 1)
+			completedPartChannels = append(completedPartChannels, completedPartChannel)
+
+			func(partBytes []byte, partNumber int64, completedPartChannel chan *s3.CompletedPart, errorChannel chan error) {
+				pool.Submit(func() {
+					completedPart, err := receiver.uploadPart(partBytes, partNumber)
+					if err != nil {
+						errorChannel <- err
+					}
+					completedPartChannel <- completedPart
+					close(errorChannel)
+					close(completedPartChannel)
+				})
+			}(partBytes, partNumber, completedPartChannel, errorChannel)  //copy partBytes and partNumber so it is unique for the closure
+
 			partNumber++
-			completedParts = append(completedParts, completedPart)
 		}
 	}
 }
 
-func (receiver *Uploader) uploadPart(partNumber int64, partSize int64) (*s3.CompletedPart, error) {
-	log.Printf("Upload part %d using part size %d", partNumber, partSize)
+func (receiver *Uploader) readPart(partSize int64) ([]byte, error) {
+	//log.Println("read a part")
 	//read up to partSize amount of bytes
 	fullPartBytes := make([]byte, partSize)
 
@@ -92,12 +136,18 @@ func (receiver *Uploader) uploadPart(partNumber int64, partSize int64) (*s3.Comp
 	//possible that the last read returns less than a full partSize, so we need to slice the bytes to the read size
 	partBytes := fullPartBytes[:partBytesRead]
 
+	return partBytes, nil
+}
+
+func (receiver *Uploader) uploadPart(partBytes []byte, partNumber int64) (*s3.CompletedPart, error) {
+	//log.Printf("upload a part %d", partNumber)
+
 	md5Hash := calculateMd5Hash(partBytes)
 
 	partInput := &s3.UploadPartInput{
 		Body:          bytes.NewReader(partBytes),
 		Bucket:        receiver.multipartUploadData.Bucket,
-		ContentLength: aws.Int64(int64(partBytesRead)),
+		ContentLength: aws.Int64(int64(len(partBytes))),
 		ContentMD5:    aws.String(md5Hash),
 		Key:           receiver.multipartUploadData.Key,
 		PartNumber:    &partNumber,
