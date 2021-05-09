@@ -75,7 +75,6 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 			partBytes, err := receiver.readPart(partSize)
 			if err != nil {
 				if err == io.EOF {
-					//log.Println("EOF")
 					//we're done reading, check the upload error channels first before we call this a success
 					errors := parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels)
 					for _, err = range errors {
@@ -91,7 +90,6 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 
 			//check upload errors every taskQueueSize times
 			if partNumber % int64(taskQueueSize) == 0 {
-				//log.Println("Checking upload errors")
 				errors := parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels)
 				for _, err = range errors {
 					if err != nil {
@@ -124,7 +122,6 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 }
 
 func (receiver *Uploader) readPart(partSize int64) ([]byte, error) {
-	//log.Println("read a part")
 	//read up to partSize amount of bytes
 	fullPartBytes := make([]byte, partSize)
 
@@ -140,8 +137,6 @@ func (receiver *Uploader) readPart(partSize int64) ([]byte, error) {
 }
 
 func (receiver *Uploader) uploadPart(partBytes []byte, partNumber int64) (*s3.CompletedPart, error) {
-	//log.Printf("upload a part %d", partNumber)
-
 	md5Hash := calculateMd5Hash(partBytes)
 
 	partInput := &s3.UploadPartInput{
