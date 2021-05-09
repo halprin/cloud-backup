@@ -76,11 +76,9 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 			if err != nil {
 				if err == io.EOF {
 					//we're done reading, check the upload error channels first before we call this a success
-					errors := parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels)
-					for _, err = range errors {
-						if err != nil {
-							return nil, err
-						}
+					err := returnFirstErrorInSlice(parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels))
+					if err != nil {
+						return nil, err
 					}
 					//no upload errors, so return the completed parts
 					return parallel.ConvertChannelsOfCompletedPartsToSlice(completedPartChannels), nil
@@ -90,11 +88,9 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 
 			//check upload errors every taskQueueSize times
 			if partNumber % int64(taskQueueSize) == 0 {
-				errors := parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels)
-				for _, err = range errors {
-					if err != nil {
-						return nil, err
-					}
+				err := returnFirstErrorInSlice(parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels))
+				if err != nil {
+					return nil, err
 				}
 				errorChannels = make([]chan error, 0, taskQueueSize)
 			}
@@ -109,6 +105,9 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 					completedPart, err := receiver.uploadPart(partBytes, partNumber)
 					if err != nil {
 						errorChannel <- err
+						close(errorChannel)
+						close(completedPartChannel)
+						return
 					}
 					completedPartChannel <- completedPart
 					close(errorChannel)
@@ -194,4 +193,14 @@ func calculateMd5Hash(partBytes []byte) string {
 	md5Algorithm.Write(partBytes)
 	md5Hash := base64.StdEncoding.EncodeToString(md5Algorithm.Sum(nil))
 	return md5Hash
+}
+
+func returnFirstErrorInSlice(errorSlice []error) error {
+	for _, err := range errorSlice {
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
