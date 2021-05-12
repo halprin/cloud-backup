@@ -10,8 +10,6 @@ import (
 
 func main() {
 	cli.Cli()
-	//backupSet()
-	//decrypt()
 }
 
 func decrypt() {
