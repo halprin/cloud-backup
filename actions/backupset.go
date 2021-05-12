@@ -50,12 +50,6 @@ func Backup(configFilePath string) error {
 func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) error {
 	log.Printf("Backing-up %s (%s)", backupFile.Title, backupFile.Path)
 
-	//outputFile, err := os.Create(filepath.Join(overallConfig.IntermediatePath, backupFile.Title + ".cipher"))
-	//if err != nil {
-	//	return err
-	//}
-	//defer outputFile.Close()
-
 	uploader, err := transfer.NewUploader(backupFile, overallConfig, overallFolderName)
 	if err != nil {
 		return err
