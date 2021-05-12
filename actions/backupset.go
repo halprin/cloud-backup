@@ -12,10 +12,10 @@ import (
 	"time"
 )
 
-func Backup() error {
+func Backup(configFilePath string) error {
 	log.Println("Backing-up file set")
 
-	overallConfig, err := config.BackupConfig()
+	overallConfig, err := config.New(configFilePath)
 	if err != nil {
 		return err
 	}

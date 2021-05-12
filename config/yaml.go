@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"log"
 	"os"
@@ -25,13 +26,19 @@ var backupConfig *BackupConfiguration
 
 func BackupConfig() (BackupConfiguration, error) {
 	if backupConfig == nil {
-		tempBackupConfig, err := parse(os.Args[1])
-		if err != nil {
-			return BackupConfiguration{}, err
-		}
-
-		backupConfig = &tempBackupConfig
+		return BackupConfiguration{}, fmt.Errorf("backup config not initialized first")
 	}
+
+	return *backupConfig, nil
+}
+
+func New(configFilePath string) (BackupConfiguration, error) {
+	tempBackupConfig, err := parse(configFilePath)
+	if err != nil {
+		return BackupConfiguration{}, err
+	}
+
+	backupConfig = &tempBackupConfig
 
 	return *backupConfig, nil
 }

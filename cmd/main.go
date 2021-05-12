@@ -1,23 +1,17 @@
 package main
 
 import (
-	"github.com/halprin/cloud-backup-go/actions"
 	"github.com/halprin/cloud-backup-go/config"
 	"github.com/halprin/cloud-backup-go/crypt"
+	"github.com/halprin/cloud-backup-go/external/cli"
 	"log"
 	"os"
 )
 
 func main() {
-	backupSet()
+	cli.Cli()
+	//backupSet()
 	//decrypt()
-}
-
-func backupSet() {
-	err := actions.Backup()
-	if err != nil {
-		log.Fatal(err.Error())
-	}
 }
 
 func decrypt() {
