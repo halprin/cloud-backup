@@ -35,9 +35,24 @@ func Cli() {
 			return 0
 		})
 
+	installAction := cli.NewCommand("install", "Install automatic backup agent").
+		WithArg(cli.NewArg("config file", "The configuration file that describes how and what to backup")).
+		WithOption(cli.NewOption("month", "Specify a month for when to backup").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("day", "Specify a day in the month for when to backup").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("weekday", "Specify a day of the week for when to backup").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("hour", "Specify an hour for when to backup").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("minute", "Specify a minute for when to backup").WithType(cli.TypeInt)).
+		WithAction(func(args []string, options map[string]string) int {
+			log.Println(args)
+			log.Println(options)
+
+			return 0
+		})
+
 	cliApplication := cli.New("Backup files to the cloud").
 		WithCommand(backupAction).
-		WithCommand(restoreAction)
+		WithCommand(restoreAction).
+		WithCommand(installAction)
 
 	os.Exit(cliApplication.Run(os.Args, os.Stdout))
 }
