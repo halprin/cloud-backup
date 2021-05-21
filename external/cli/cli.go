@@ -5,6 +5,7 @@ import (
 	"github.com/teris-io/cli"
 	"log"
 	"os"
+	"strconv"
 )
 
 func Cli() {
@@ -45,6 +46,73 @@ func Cli() {
 		WithAction(func(args []string, options map[string]string) int {
 			log.Println(args)
 			log.Println(options)
+
+			var optionalMonth *int
+			var optionalDay *int
+			var optionalWeekday *int
+			var optionalHour *int
+			var optionalMinute *int
+
+			monthString, exists := options["month"]
+			if exists {
+				month, err := strconv.Atoi(monthString)
+				if err != nil {
+					log.Println(err.Error())
+					return 1
+				}
+
+				optionalMonth = &month
+			}
+
+			dayString, exists := options["day"]
+			if exists {
+				day, err := strconv.Atoi(dayString)
+				if err != nil {
+					log.Println(err.Error())
+					return 2
+				}
+
+				optionalDay = &day
+			}
+
+			weekdayString, exists := options["weekday"]
+			if exists {
+				weekday, err := strconv.Atoi(weekdayString)
+				if err != nil {
+					log.Println(err.Error())
+					return 3
+				}
+
+				optionalWeekday = &weekday
+			}
+
+			hourString, exists := options["hour"]
+			if exists {
+				hour, err := strconv.Atoi(hourString)
+				if err != nil {
+					log.Println(err.Error())
+					return 4
+				}
+
+				optionalHour = &hour
+			}
+
+			minuteString, exists := options["minute"]
+			if exists {
+				minute, err := strconv.Atoi(minuteString)
+				if err != nil {
+					log.Println(err.Error())
+					return 5
+				}
+
+				optionalMinute = &minute
+			}
+
+			err := actions.Install(args[0], optionalMonth, optionalDay, optionalWeekday, optionalHour, optionalMinute)
+			if err != nil {
+				log.Println(err.Error())
+				return 6
+			}
 
 			return 0
 		})

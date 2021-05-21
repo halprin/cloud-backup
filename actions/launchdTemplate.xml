@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>io.halprin.backup</string>
+        <key>ProgramArguments</key>
+        <array>
+            <string>{{.Script}}</string>
+            <string>backup</string>
+            <string>{{.ConfigYml}}</string>
+        </array>
+        <key>EnvironmentVariables</key>
+        <dict>
+            <key>LC_ALL</key>
+            <string>en_US.utf-8</string>
+            <key>LANG</key>
+            <string>en_US.utf-8</string>
+        </dict>
+        <key>StandardOutPath</key>
+        <string>/tmp/cloud-backup.stdout</string>
+        <key>StandardErrorPath</key>
+        <string>/tmp/cloud-backup.stderr</string>
+        <key>StartCalendarInterval</key>
+        <array>
+            <dict>
+                {{.Interval}}
+            </dict>
+        </array>
+    </dict>
+</plist>
