@@ -3,7 +3,9 @@ package actions
 import (
 	_ "embed"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"text/template"
@@ -22,6 +24,33 @@ type templateFields struct {
 }
 
 func Install(configFilePath string, month *int, day *int, weekday *int, hour *int, minute *int) error {
+	log.Println("Installing launchd daemon")
+
+	err := writeOutLaunchdConfig(configFilePath, month, day, weekday, hour, minute)
+	if err != nil {
+		return err
+	}
+
+	err = loadLaunchdConfig()
+	if err != nil {
+		return err
+	}
+
+	log.Println("Launchd daemon installed")
+	return nil
+}
+
+func loadLaunchdConfig() error {
+	log.Println("Loading into launchd")
+
+	command := exec.Command("launchctl", "load", launchdConfigPath)
+	err := command.Run()
+	return err
+}
+
+func writeOutLaunchdConfig(configFilePath string, month *int, day *int, weekday *int, hour *int, minute *int) error {
+	log.Printf("Writing out launchd daemon to %s", configFilePath)
+
 	launchdTemplate, err := template.New("launchdTemplate").Parse(launchdTemplateString)
 	if err != nil {
 		return err

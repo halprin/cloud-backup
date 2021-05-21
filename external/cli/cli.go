@@ -44,9 +44,6 @@ func Cli() {
 		WithOption(cli.NewOption("hour", "Specify an hour for when to backup").WithType(cli.TypeInt)).
 		WithOption(cli.NewOption("minute", "Specify a minute for when to backup").WithType(cli.TypeInt)).
 		WithAction(func(args []string, options map[string]string) int {
-			log.Println(args)
-			log.Println(options)
-
 			var optionalMonth *int
 			var optionalDay *int
 			var optionalWeekday *int
