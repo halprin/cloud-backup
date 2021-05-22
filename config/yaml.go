@@ -12,7 +12,6 @@ type BackupConfiguration struct {
 	KmsKey            string                    `yaml:"kms_key"`
 	EncryptionContext string                    `yaml:"encryption_context"`
 	S3Bucket          string                    `yaml:"s3_bucket"`
-	IntermediatePath  string                    `yaml:"intermediate_path"`
 	BackupFiles       []BackupFileConfiguration `yaml:"backup"`
 }
 
