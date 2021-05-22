@@ -16,6 +16,10 @@ $ cloud-backup
 
 There is help built into the CLI.
 
+You may need to allow `cloud-backup` to execute on your Mac when you first run it.  Navigate to Security & Privacy
+in System Preferences to allow execution.  Also, depending on what files and folders you want to backup, you may need to
+give `cloud-backup` access to certain files and folders under the Privacy tab.
+
 ## Features
 
 ### Backup
