@@ -114,10 +114,22 @@ func Cli() {
 			return 0
 		})
 
+	uninstallAction := cli.NewCommand("uninstall", "Uninstall the automatic backup agent").
+		WithAction(func(args []string, options map[string]string) int {
+			err := actions.Uninstall()
+			if err != nil {
+				log.Println(err.Error())
+				return 1
+			}
+
+			return 0
+		})
+
 	cliApplication := cli.New("Backup files to the cloud").
 		WithCommand(backupAction).
 		WithCommand(restoreAction).
-		WithCommand(installAction)
+		WithCommand(installAction).
+		WithCommand(uninstallAction)
 
 	os.Exit(cliApplication.Run(os.Args, os.Stdout))
 }

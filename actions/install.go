@@ -15,7 +15,8 @@ import (
 var launchdTemplateString string
 
 var globalDaemons = "/Library/LaunchDaemons/"
-var launchdConfigPath = filepath.Join(globalDaemons, "io.halprin.backup.plist")
+var launchdId = "io.halprin.backup"
+var launchdConfigPath = filepath.Join(globalDaemons, fmt.Sprintf("%s.plist", launchdId))
 
 type templateFields struct {
 	Script    string
@@ -26,6 +27,13 @@ type templateFields struct {
 func Install(configFilePath string, month *int, day *int, weekday *int, hour *int, minute *int) error {
 	log.Println("Installing launchd daemon")
 
+	if isDaemonLoaded() {
+		err := Uninstall()
+		if err != nil {
+			return err
+		}
+	}
+
 	err := writeOutLaunchdConfig(configFilePath, month, day, weekday, hour, minute)
 	if err != nil {
 		return err
@@ -33,6 +41,8 @@ func Install(configFilePath string, month *int, day *int, weekday *int, hour *in
 
 	err = loadLaunchdConfig()
 	if err != nil {
+		log.Println("Error loading launchd config")
+		_ = removeLaunchdConfig()
 		return err
 	}
 
@@ -102,4 +112,14 @@ func constructInterval(month *int, day *int, weekday *int, hour *int, minute *in
 	}
 
 	return intervalBuilder.String()
+}
+
+func isDaemonLoaded() bool {
+	command := exec.Command("launchctl", "list", launchdId)
+	err := command.Run()
+	if err != nil {
+		return false
+	}
+
+	return true
 }
