@@ -23,8 +23,5 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-#    - name: Get dependencies
-#      run: go get -v -t -d ./cmd/
-
     - name: Build
       run: go build -o cloud-backup -v ./cmd/
