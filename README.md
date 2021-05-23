@@ -38,6 +38,14 @@ $ cloud-backup restore --help
 
 Restores a previously backed-up file to a specified restore location.
 
+### List
+
+```shell
+$ cloud-backup list --help
+```
+
+List timestamps or backups at the specified timestamp.
+
 ### Install and Uninstall
 
 ```shell
