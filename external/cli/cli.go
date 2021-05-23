@@ -125,11 +125,32 @@ func Cli() {
 			return 0
 		})
 
+	listAction := cli.NewCommand("list", "List backup files that can be restored").
+		WithArg(cli.NewArg("config file", "The configuration file that describes how and what to backup")).
+		WithArg(cli.NewArg("timestamp", "The configuration file that describes how and what to backup").AsOptional()).
+		WithAction(func(args []string, options map[string]string) int {
+			var err error
+
+			if len(args) < 2 {
+				err = actions.List(args[0], "")
+			} else {
+				err = actions.List(args[0], args[1])
+			}
+
+			if err != nil {
+				log.Println(err.Error())
+				return 1
+			}
+
+			return 0
+		})
+
 	cliApplication := cli.New("Backup files to the cloud").
 		WithCommand(backupAction).
 		WithCommand(restoreAction).
 		WithCommand(installAction).
-		WithCommand(uninstallAction)
+		WithCommand(uninstallAction).
+		WithCommand(listAction)
 
 	os.Exit(cliApplication.Run(os.Args, os.Stdout))
 }
