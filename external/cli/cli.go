@@ -38,11 +38,11 @@ func Cli() {
 
 	installAction := cli.NewCommand("install", "Install automatic backup agent").
 		WithArg(cli.NewArg("config file", "The configuration file that describes how and what to backup")).
-		WithOption(cli.NewOption("month", "Specify a month for when to backup").WithType(cli.TypeInt)).
-		WithOption(cli.NewOption("day", "Specify a day in the month for when to backup").WithType(cli.TypeInt)).
-		WithOption(cli.NewOption("weekday", "Specify a day of the week for when to backup").WithType(cli.TypeInt)).
-		WithOption(cli.NewOption("hour", "Specify an hour for when to backup").WithType(cli.TypeInt)).
-		WithOption(cli.NewOption("minute", "Specify a minute for when to backup").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("month", "Specify a month for when to backup (1 - 12)").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("day", "Specify a day in the month for when to backup (1 - 31)").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("weekday", "Specify a day of the week for when to backup (0 - 7)").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("hour", "Specify an hour for when to backup (0 - 23)").WithType(cli.TypeInt)).
+		WithOption(cli.NewOption("minute", "Specify a minute for when to backup (0 - 59)").WithType(cli.TypeInt)).
 		WithAction(func(args []string, options map[string]string) int {
 			var optionalMonth *int
 			var optionalDay *int
