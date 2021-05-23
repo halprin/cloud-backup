@@ -44,13 +44,15 @@ Restores a previously backed-up file to a specified restore location.
 $ sudo cloud-backup install --help
 ```
 
-Creates a launchd daemon to execute a backup on a specified cadence.
+Creates a launchd daemon to execute a backup on a specified cadence.  Notice the `sudo`.  It is required because this
+command creates a daemon which runs system wide and not just for a specific user.  This means `cloud-backup` runs as
+`root` when executed through this manner.
 
 ```shell
 $ sudo cloud-backup uninstall --help
 ```
 
-Uninstalls the launchd daemon.
+Uninstalls the launchd daemon.  Notice the `sudo`.  Uninstalling a system wide daemon requires it.
 
 ## Configuration File Format
 
