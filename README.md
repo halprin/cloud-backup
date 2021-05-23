@@ -63,7 +63,7 @@ schema.
 awsCredentialConfigPath: #the full path to folder holding your shared credentials and config files; optional; if unspecified, uses the executing user's ~/.aws/ folder
 aws_profile: #a profile specified in shared credentials and config files
 kms_key: #a KMS key ARN
-encryption_context: #a special value built into the encrypted file that, upon decryption, is verified; optional; defaults to 'encryption_context'
+encryption_context: #a special value built into the encrypted file that, upon decryption, is verified
 s3_bucket: #an S3 bucket name where the files are backed-up to
 backup:
   - title: #a title to give this specific back-up file
