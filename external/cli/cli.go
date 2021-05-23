@@ -127,7 +127,7 @@ func Cli() {
 
 	listAction := cli.NewCommand("list", "List backup files that can be restored").
 		WithArg(cli.NewArg("config file", "The configuration file that describes how and what to backup")).
-		WithArg(cli.NewArg("timestamp", "The configuration file that describes how and what to backup").AsOptional()).
+		WithArg(cli.NewArg("timestamp", "The timestamp in which to view available backups").AsOptional()).
 		WithAction(func(args []string, options map[string]string) int {
 			var err error
 
