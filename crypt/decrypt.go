@@ -84,7 +84,7 @@ func (receiver *decryptor) readV1Preamble() error {
 }
 
 func (receiver *decryptor) setUpEncryption() error {
-	decryptionKey, err := getDecryptionKey(receiver.encryptedDataKey, receiver.config.EncryptionContext, receiver.config.AwsProfile)
+	decryptionKey, err := getDecryptionKey(receiver.encryptedDataKey, receiver.config.EncryptionContext, receiver.config.AwsCredentialConfigPath, receiver.config.AwsProfile)
 	if err != nil {
 		return err
 	}

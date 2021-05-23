@@ -2,12 +2,11 @@ package transfer
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	myAws "github.com/halprin/cloud-backup-go/aws"
 	"github.com/halprin/cloud-backup-go/aws/myS3Manager"
 	"github.com/halprin/cloud-backup-go/config"
 	"io"
-	"log"
 	"path"
 	"sync"
 )
@@ -23,7 +22,7 @@ type uploader struct {
 func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) (*uploader, error) {
 	pipeReader, pipeWriter := io.Pipe()
 
-	s3Uploader, err := getUploader(overallConfig.AwsProfile)
+	s3Uploader, err := getUploader(overallConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -68,12 +67,9 @@ func (receiver *uploader) initiateUpload() {
 	receiver.waitGroup.Done()
 }
 
-func getUploader(awsProfile string) (*myS3Manager.Uploader, error) {
-	awsSession, err := session.NewSessionWithOptions(session.Options{
-		Profile: awsProfile,
-	})
+func getUploader(overallConfig config.BackupConfiguration) (*myS3Manager.Uploader, error) {
+	awsSession, err := myAws.GetSession(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
-		log.Println("Initial AWS session failed")
 		return nil, err
 	}
 

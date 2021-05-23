@@ -8,11 +8,12 @@ import (
 )
 
 type BackupConfiguration struct {
-	AwsProfile        string                    `yaml:"aws_profile"`
-	KmsKey            string                    `yaml:"kms_key"`
-	EncryptionContext string                    `yaml:"encryption_context"`
-	S3Bucket          string                    `yaml:"s3_bucket"`
-	BackupFiles       []BackupFileConfiguration `yaml:"backup"`
+	AwsCredentialConfigPath string                    `yaml:"awsCredentialConfigPath"`
+	AwsProfile              string                    `yaml:"aws_profile"`
+	KmsKey                  string                    `yaml:"kms_key"`
+	EncryptionContext       string                    `yaml:"encryption_context"`
+	S3Bucket                string                    `yaml:"s3_bucket"`
+	BackupFiles             []BackupFileConfiguration `yaml:"backup"`
 }
 
 type BackupFileConfiguration struct {

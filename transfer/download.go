@@ -2,11 +2,10 @@ package transfer
 
 import (
 	"fmt"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
+	myAws "github.com/halprin/cloud-backup-go/aws"
 	"github.com/halprin/cloud-backup-go/config"
 	"io"
-	"log"
 )
 
 type downloader struct {
@@ -16,11 +15,8 @@ type downloader struct {
 }
 
 func NewDownloader(overallConfig config.BackupConfiguration, timestamp string, backupFile string) (*downloader, error) {
-	awsSession, err := session.NewSessionWithOptions(session.Options{
-		Profile: overallConfig.AwsProfile,
-	})
+	awsSession, err := myAws.GetSession(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
-		log.Println("Initial AWS session failed")
 		return nil, err
 	}
 

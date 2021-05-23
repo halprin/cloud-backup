@@ -2,13 +2,12 @@ package crypt
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/kms"
-	"log"
+	myAws "github.com/halprin/cloud-backup-go/aws"
 )
 
-func getEncryptionKey(kmsKeyArn string, encryptionContext string, awsProfile string) (*dataKey, error) {
-	kmsService, err := getKmsClient(awsProfile)
+func getEncryptionKey(kmsKeyArn string, encryptionContext string, awsCredentialConfigPath string, awsProfile string) (*dataKey, error) {
+	kmsService, err := getKmsClient(awsCredentialConfigPath, awsProfile)
 	if err != nil {
 		return nil, err
 	}
@@ -34,8 +33,8 @@ func getEncryptionKey(kmsKeyArn string, encryptionContext string, awsProfile str
 	return newDataKey, nil
 }
 
-func getDecryptionKey(encryptedDataKey []byte, encryptionContext string, awsProfile string) (*dataKey, error) {
-	kmsService, err := getKmsClient(awsProfile)
+func getDecryptionKey(encryptedDataKey []byte, encryptionContext string, awsCredentialConfigPath string, awsProfile string) (*dataKey, error) {
+	kmsService, err := getKmsClient(awsCredentialConfigPath, awsProfile)
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +59,9 @@ func getDecryptionKey(encryptedDataKey []byte, encryptionContext string, awsProf
 	return &newDataKey, nil
 }
 
-func getKmsClient(awsProfile string) (*kms.KMS, error) {
-	awsSession, err := session.NewSessionWithOptions(session.Options{
-		Profile: awsProfile,
-	})
+func getKmsClient(awsCredentialConfigPath string, awsProfile string) (*kms.KMS, error) {
+	awsSession, err := myAws.GetSession(awsCredentialConfigPath, awsProfile)
 	if err != nil {
-		log.Println("Initial AWS session failed")
 		return nil, err
 	}
 

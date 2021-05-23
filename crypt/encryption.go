@@ -86,7 +86,7 @@ func (receiver *encryptor) setUpEncryptionOnce() error {
 		return nil
 	}
 
-	encryptionKey, err := getEncryptionKey(receiver.config.KmsKey, receiver.config.EncryptionContext, receiver.config.AwsProfile)
+	encryptionKey, err := getEncryptionKey(receiver.config.KmsKey, receiver.config.EncryptionContext, receiver.config.AwsCredentialConfigPath, receiver.config.AwsProfile)
 	if err != nil {
 		return err
 	}
