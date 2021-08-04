@@ -64,4 +64,3 @@ func writeV100Preamble(encryptedDataKey []byte, writer io.Writer) error {
 	_, err = writer.Write(v100PreambleBytes)
 	return err
 }
-
