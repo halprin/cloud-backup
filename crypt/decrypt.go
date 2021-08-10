@@ -13,7 +13,6 @@ type decryptor struct {
 	outputWriter     io.Writer
 	config           config.BackupConfiguration
 	decoderInterface EnvelopeEncryptionReader
-	//gobDecoder *gob.Decoder
 
 	authenticatedEncryption cipher.AEAD
 	encryptedDataKey []byte
