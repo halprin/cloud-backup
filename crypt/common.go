@@ -11,6 +11,11 @@ type EnvelopeEncryptionWriter interface {
 	WriteEncryptedChunk(cipherText []byte, nonce []byte, writer io.Writer) error
 }
 
+type EnvelopeEncryptionReader interface {
+	ReadEncryptedDataKey(reader io.Reader) ([]byte, error)
+	ReadEncryptedChunk(reader io.Reader) ([]byte, []byte, error)
+}
+
 type preamble struct {
 	Version string
 }

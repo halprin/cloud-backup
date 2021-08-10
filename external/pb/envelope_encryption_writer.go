@@ -1,11 +1,12 @@
 package pb
 
 import (
+	"encoding/binary"
 	"google.golang.org/protobuf/proto"
 	"io"
 )
 
-const PreambleVersion = "1.0.0"
+const PreambleVersionV100 = "1.0.0"
 
 type ProtoBufEnvelopeEncryptionWriter struct {
 }
@@ -33,13 +34,13 @@ func (p ProtoBufEnvelopeEncryptionWriter) WriteEncryptedChunk(cipherText []byte,
 		return err
 	}
 
-	_, err = writer.Write(v100EnvelopeBytes)
+	err = writeMessage(v100EnvelopeBytes, writer)
 	return err
 }
 
 func writePreamble(writer io.Writer) error {
 	preamble := &Preamble{
-		Version: PreambleVersion,
+		Version: PreambleVersionV100,
 	}
 
 	preambleBytes, err := proto.Marshal(preamble)
@@ -47,7 +48,7 @@ func writePreamble(writer io.Writer) error {
 		return err
 	}
 
-	_, err = writer.Write(preambleBytes)
+	err = writeMessage(preambleBytes, writer)
 	return err
 }
 
@@ -61,6 +62,26 @@ func writeV100Preamble(encryptedDataKey []byte, writer io.Writer) error {
 		return err
 	}
 
-	_, err = writer.Write(v100PreambleBytes)
+	err = writeMessage(v100PreambleBytes, writer)
+	return err
+}
+
+//https://github.com/golang/protobuf/issues/507#issuecomment-391144637
+func writeMessage(rawMessage []byte, writer io.Writer) error {
+	_, err := writer.Write([]byte{1<<3 | 2})  //write a tag of field 1 of type bytes
+	if err != nil {
+		return err
+	}
+
+	//encode the length of the message in as a UVarInt
+	var messageLengthArray [binary.MaxVarintLen64]byte
+	messageLengthSlice := messageLengthArray[:binary.PutUvarint(messageLengthArray[:], uint64(len(rawMessage)))]
+
+	_, err = writer.Write(messageLengthSlice)  //write the length
+	if err != nil {
+		return err
+	}
+
+	_, err = writer.Write(rawMessage)  //finally, write the actual message
 	return err
 }

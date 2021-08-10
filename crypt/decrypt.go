@@ -34,7 +34,7 @@ func (receiver *decryptor) Decrypt() error {
 		return err
 	}
 
-	err = receiver.readV1Preamble()
+	err = receiver.readEncryptedDataKey()
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (receiver *decryptor) readPreamble() error {
 	return nil
 }
 
-func (receiver *decryptor) readV1Preamble() error {
+func (receiver *decryptor) readEncryptedDataKey() error {
 	var v1PreambleStruct v100Preamble
 
 	err := receiver.gobDecoder.Decode(&v1PreambleStruct)
