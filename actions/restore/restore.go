@@ -1,9 +1,8 @@
-package actions
+package restore
 
 import (
 	"github.com/halprin/cloud-backup-go/config"
 	"github.com/halprin/cloud-backup-go/crypt"
-	"github.com/halprin/cloud-backup-go/transfer"
 	"log"
 	"os"
 	"path/filepath"
@@ -17,12 +16,7 @@ func Restore(configFilePath string, timestamp string, backupFile string, restore
 
 	log.Printf("Restoring file %s from %s to %s", backupFile, timestamp, restorePath)
 
-	downloader, err := transfer.NewDownloader(overallConfig, timestamp, backupFile)
-	if err != nil {
-		return err
-	}
-
-	downloadReader, err := downloader.Download()
+	sourceReader, err := getSourceReader(overallConfig, timestamp, backupFile)
 	if err != nil {
 		return err
 	}
@@ -34,7 +28,7 @@ func Restore(configFilePath string, timestamp string, backupFile string, restore
 	}
 	defer outputFile.Close()
 
-	decryptor := crypt.NewDecryptor(downloadReader, outputFile, overallConfig)
+	decryptor := crypt.NewDecryptor(sourceReader, outputFile, overallConfig)
 
 	err = decryptor.Decrypt()
 	if err != nil {

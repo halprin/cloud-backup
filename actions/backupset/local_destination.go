@@ -6,7 +6,7 @@ import (
 	"github.com/halprin/cloud-backup-go/config"
 	"io"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 func getDestinationWriter(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) (io.WriteCloser, error) {
@@ -15,7 +15,7 @@ func getDestinationWriter(backupFile config.BackupFileConfiguration, overallConf
 		return nil, err
 	}
 
-	fullPath := path.Join(homeDirectory, "Desktop", overallFolderName, backupFile.Title + ".cipher")
+	fullPath := filepath.Join(homeDirectory, "Desktop", overallFolderName, backupFile.Title + ".cipher")
 	err = ensureBaseDirExists(fullPath)
 	if err != nil {
 		return nil, err
@@ -30,7 +30,7 @@ func getDestinationWriter(backupFile config.BackupFileConfiguration, overallConf
 }
 
 func ensureBaseDirExists(thePath string) error {
-	baseDir := path.Dir(thePath)
+	baseDir := filepath.Dir(thePath)
 
 	info, err := os.Stat(baseDir)
 	if err == nil && info.IsDir() {

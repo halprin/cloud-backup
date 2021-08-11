@@ -3,6 +3,7 @@ package cli
 import (
 	"github.com/halprin/cloud-backup-go/actions"
 	"github.com/halprin/cloud-backup-go/actions/backupset"
+	"github.com/halprin/cloud-backup-go/actions/restore"
 	"github.com/teris-io/cli"
 	"log"
 	"os"
@@ -28,7 +29,7 @@ func Cli() {
 		WithArg(cli.NewArg("back up file", "The file to restore")).
 		WithArg(cli.NewArg("restore path", "The location that the file is restored to")).
 		WithAction(func(args []string, options map[string]string) int {
-			err := actions.Restore(args[0], args[1], args[2], args[3])
+			err := restore.Restore(args[0], args[1], args[2], args[3])
 			if err != nil {
 				log.Println(err.Error())
 				return 1
