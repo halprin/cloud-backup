@@ -23,5 +23,8 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Install prerequisites
+      run: sudo apt install protobuf-compiler golang-goprotobuf-dev
+
     - name: Build
       run: make compile
