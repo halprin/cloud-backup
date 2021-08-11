@@ -1,4 +1,4 @@
-package actions
+package backupset
 
 import (
 	"bufio"
@@ -7,7 +7,6 @@ import (
 	"github.com/halprin/cloud-backup-go/config"
 	"github.com/halprin/cloud-backup-go/crypt"
 	"github.com/halprin/cloud-backup-go/parallel"
-	"github.com/halprin/cloud-backup-go/transfer"
 	"log"
 	"time"
 )
@@ -50,7 +49,7 @@ func Backup(configFilePath string) error {
 func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.BackupConfiguration, overallFolderName string) error {
 	log.Printf("Backing-up %s (%s)", backupFile.Title, backupFile.Path)
 
-	uploader, err := transfer.NewUploader(backupFile, overallConfig, overallFolderName)
+	uploader, err := getDestinationWriter(backupFile, overallConfig, overallFolderName)
 	if err != nil {
 		return err
 	}

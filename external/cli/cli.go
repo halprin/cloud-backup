@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/halprin/cloud-backup-go/actions"
+	"github.com/halprin/cloud-backup-go/actions/backupset"
 	"github.com/teris-io/cli"
 	"log"
 	"os"
@@ -12,7 +13,7 @@ func Cli() {
 	backupAction := cli.NewCommand("backup", "Initiate a backup").
 		WithArg(cli.NewArg("config file", "The configuration file that describes how and what to backup")).
 		WithAction(func(args []string, options map[string]string) int {
-			err := actions.Backup(args[0])
+			err := backupset.Backup(args[0])
 			if err != nil {
 				log.Println(err.Error())
 				return 1
