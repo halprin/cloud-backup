@@ -23,7 +23,7 @@ func NewEncryptor(outputWriter io.Writer, config config.BackupConfiguration) *en
 	return &encryptor{
 		outputWriter:     outputWriter,
 		config:           config,
-		encoderInterface: pb.ProtoBufEnvelopeEncryptionWriter{},
+		encoderInterface: &pb.ProtoBufEnvelopeEncryptionWriter{},
 	}
 }
 

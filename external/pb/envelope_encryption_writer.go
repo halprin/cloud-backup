@@ -11,7 +11,7 @@ const PreambleVersionV100 = "1.0.0"
 type ProtoBufEnvelopeEncryptionWriter struct {
 }
 
-func (p ProtoBufEnvelopeEncryptionWriter) WriteEncryptedDataKey(encryptedDataKey []byte, writer io.Writer) error {
+func (p *ProtoBufEnvelopeEncryptionWriter) WriteEncryptedDataKey(encryptedDataKey []byte, writer io.Writer) error {
 	//write the document preamble first
 	err := writePreamble(writer)
 	if err != nil {
@@ -23,7 +23,7 @@ func (p ProtoBufEnvelopeEncryptionWriter) WriteEncryptedDataKey(encryptedDataKey
 	return err
 }
 
-func (p ProtoBufEnvelopeEncryptionWriter) WriteEncryptedChunk(cipherText []byte, nonce []byte, writer io.Writer) error {
+func (p *ProtoBufEnvelopeEncryptionWriter) WriteEncryptedChunk(cipherText []byte, nonce []byte, writer io.Writer) error {
 	v100Envelope := &V100Envelope{
 		Nonce: nonce,
 		CipherText: cipherText,
