@@ -23,7 +23,7 @@ func NewDecryptor(inputReader io.Reader, outputWriter io.Writer, config config.B
 		inputReader: inputReader,
 		outputWriter: outputWriter,
 		config: config,
-		decoderInterface: pb.ProtoBufEnvelopeEncryptionReader{},
+		decoderInterface: &pb.ProtoBufEnvelopeEncryptionReader{},
 	}
 }
 

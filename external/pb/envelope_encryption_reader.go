@@ -1,8 +1,8 @@
 package pb
 
 import (
-	"bufio"
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"io"
@@ -12,7 +12,7 @@ type ProtoBufEnvelopeEncryptionReader struct {
 	version string
 }
 
-func (p ProtoBufEnvelopeEncryptionReader) ReadEncryptedDataKey(reader io.Reader) ([]byte, error) {
+func (p *ProtoBufEnvelopeEncryptionReader) ReadEncryptedDataKey(reader io.Reader) ([]byte, error) {
 	err := p.readPreamble(reader)
 	if err != nil {
 		return nil, err
@@ -26,7 +26,7 @@ func (p ProtoBufEnvelopeEncryptionReader) ReadEncryptedDataKey(reader io.Reader)
 	return encryptedDataKey, nil
 }
 
-func (p ProtoBufEnvelopeEncryptionReader) ReadEncryptedChunk(reader io.Reader) ([]byte, []byte, error) {
+func (p *ProtoBufEnvelopeEncryptionReader) ReadEncryptedChunk(reader io.Reader) ([]byte, []byte, error) {
 	rawMessage, err := readMessage(reader)
 	if err != nil {
 		return nil, nil, err
@@ -41,7 +41,7 @@ func (p ProtoBufEnvelopeEncryptionReader) ReadEncryptedChunk(reader io.Reader) (
 	return v100Envelope.GetCipherText(), v100Envelope.GetNonce(), nil
 }
 
-func (p ProtoBufEnvelopeEncryptionReader) readPreamble(reader io.Reader) error {
+func (p *ProtoBufEnvelopeEncryptionReader) readPreamble(reader io.Reader) error {
 	rawMessage, err := readMessage(reader)
 	if err != nil {
 		return err
@@ -58,7 +58,7 @@ func (p ProtoBufEnvelopeEncryptionReader) readPreamble(reader io.Reader) error {
 	return nil
 }
 
-func (p ProtoBufEnvelopeEncryptionReader) readVersionPreamble(reader io.Reader) ([]byte, error) {
+func (p *ProtoBufEnvelopeEncryptionReader) readVersionPreamble(reader io.Reader) ([]byte, error) {
 	if p.version == PreambleVersionV100 {
 		return readV100Preamble(reader)
 	}
@@ -90,7 +90,7 @@ func readMessage(reader io.Reader) ([]byte, error) {
 	}
 
 	//read the length of the upcoming message, encoded in a UVarInt
-	byteReader := bufio.NewReader(reader)
+	byteReader := newUnbufferedByteReader(reader)
 	messageLength, err := binary.ReadUvarint(byteReader)
 	if err != nil {
 		return nil, err
@@ -104,3 +104,26 @@ func readMessage(reader io.Reader) ([]byte, error) {
 
 	return rawMessage, nil
 }
+
+type unbufferedByteReader struct {
+	reader io.Reader
+}
+
+func newUnbufferedByteReader(reader io.Reader) *unbufferedByteReader {
+	return &unbufferedByteReader{
+		reader: reader,
+	}
+}
+
+func (u *unbufferedByteReader) ReadByte() (byte, error) {
+	theByte := make([]byte, 1)
+	lengthRead, err := u.reader.Read(theByte)
+	if err != nil {
+		return 0, err
+	} else if lengthRead == 0 {
+		return 0, errors.New("unable to read a single byte")
+	}
+
+	return theByte[0], nil
+}
+
