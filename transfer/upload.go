@@ -3,9 +3,9 @@ package transfer
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
-	myAws "github.com/halprin/cloud-backup-go/aws"
-	"github.com/halprin/cloud-backup-go/aws/myS3Manager"
-	"github.com/halprin/cloud-backup-go/config"
+	myAws "github.com/halprin/cloud-backup/aws"
+	"github.com/halprin/cloud-backup/aws/myS3Manager"
+	"github.com/halprin/cloud-backup/config"
 	"io"
 	"path"
 	"sync"

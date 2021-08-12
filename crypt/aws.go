@@ -3,7 +3,7 @@ package crypt
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/kms"
-	myAws "github.com/halprin/cloud-backup-go/aws"
+	myAws "github.com/halprin/cloud-backup/aws"
 )
 
 func getEncryptionKey(kmsKeyArn string, encryptionContext string, awsCredentialConfigPath string, awsProfile string) (*dataKey, error) {

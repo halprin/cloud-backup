@@ -1,9 +1,9 @@
 package actions
 
 import (
-	"github.com/halprin/cloud-backup-go/config"
-	"github.com/halprin/cloud-backup-go/crypt"
-	"github.com/halprin/cloud-backup-go/transfer"
+	"github.com/halprin/cloud-backup/config"
+	"github.com/halprin/cloud-backup/crypt"
+	"github.com/halprin/cloud-backup/transfer"
 	"log"
 	"os"
 	"path/filepath"
