@@ -1,8 +1,8 @@
 package restore
 
 import (
-	"github.com/halprin/cloud-backup-go/config"
-	"github.com/halprin/cloud-backup-go/crypt"
+	"github.com/halprin/cloud-backup/config"
+	"github.com/halprin/cloud-backup/crypt"
 	"log"
 	"os"
 	"path/filepath"

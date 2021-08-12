@@ -3,8 +3,8 @@ package crypt
 import (
 	"crypto/cipher"
 	"crypto/rand"
-	"github.com/halprin/cloud-backup-go/config"
-	"github.com/halprin/cloud-backup-go/external/pb"
+	"github.com/halprin/cloud-backup/config"
+	"github.com/halprin/cloud-backup/external/pb"
 	"io"
 )
 

@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/halprin/cloud-backup-go/config"
-	"github.com/halprin/cloud-backup-go/crypt"
-	"github.com/halprin/cloud-backup-go/external/cli"
+	"github.com/halprin/cloud-backup/config"
+	"github.com/halprin/cloud-backup/crypt"
+	"github.com/halprin/cloud-backup/external/cli"
 	"log"
 	"os"
 )

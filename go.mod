@@ -1,4 +1,4 @@
-module github.com/halprin/cloud-backup-go
+module github.com/halprin/cloud-backup
 
 go 1.16
 

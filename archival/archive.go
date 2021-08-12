@@ -2,7 +2,7 @@ package archival
 
 import (
 	"archive/tar"
-	"github.com/halprin/cloud-backup-go/config"
+	"github.com/halprin/cloud-backup/config"
 	"io"
 	"io/fs"
 	"os"
