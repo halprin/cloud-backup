@@ -24,7 +24,12 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Install prerequisites
-      run: sudo apt install protobuf-compiler golang-goprotobuf-dev
+      run: |
+        sudo apt install protobuf-compiler
+        go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
 
     - name: Build
       run: make compile
+
+    - name: Build Local Test
+      run: make compileLocal
