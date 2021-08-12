@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"github.com/halprin/cloud-backup-go/actions"
+	"github.com/halprin/cloud-backup/actions"
 	"github.com/teris-io/cli"
 	"log"
 	"os"

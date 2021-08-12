@@ -2,12 +2,12 @@ package actions
 
 import (
 	"bufio"
-	"github.com/halprin/cloud-backup-go/archival"
-	"github.com/halprin/cloud-backup-go/compression"
-	"github.com/halprin/cloud-backup-go/config"
-	"github.com/halprin/cloud-backup-go/crypt"
-	"github.com/halprin/cloud-backup-go/parallel"
-	"github.com/halprin/cloud-backup-go/transfer"
+	"github.com/halprin/cloud-backup/archival"
+	"github.com/halprin/cloud-backup/compression"
+	"github.com/halprin/cloud-backup/config"
+	"github.com/halprin/cloud-backup/crypt"
+	"github.com/halprin/cloud-backup/parallel"
+	"github.com/halprin/cloud-backup/transfer"
 	"log"
 	"time"
 )

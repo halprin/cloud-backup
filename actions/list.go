@@ -3,8 +3,8 @@ package actions
 import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/s3"
-	myAws "github.com/halprin/cloud-backup-go/aws"
-	"github.com/halprin/cloud-backup-go/config"
+	myAws "github.com/halprin/cloud-backup/aws"
+	"github.com/halprin/cloud-backup/config"
 	"log"
 	"path"
 )

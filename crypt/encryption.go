@@ -4,7 +4,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/gob"
-	"github.com/halprin/cloud-backup-go/config"
+	"github.com/halprin/cloud-backup/config"
 	"io"
 )
 
