@@ -3,7 +3,18 @@ package crypt
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"io"
 )
+
+type EnvelopeEncryptionWriter interface {
+	WriteEncryptedDataKey(encryptedDataKey []byte, writer io.Writer) error
+	WriteEncryptedChunk(cipherText []byte, nonce []byte, writer io.Writer) error
+}
+
+type EnvelopeEncryptionReader interface {
+	ReadEncryptedDataKey(reader io.Reader) ([]byte, error)
+	ReadEncryptedChunk(reader io.Reader) ([]byte, []byte, error)
+}
 
 type preamble struct {
 	Version string

@@ -3,28 +3,27 @@ package crypt
 import (
 	"crypto/cipher"
 	"crypto/rand"
-	"encoding/gob"
 	"github.com/halprin/cloud-backup/config"
+	"github.com/halprin/cloud-backup/external/pb"
 	"io"
 )
 
 type encryptor struct {
-	outputWriter io.Writer
-	config       config.BackupConfiguration
-	gobEncoder   *gob.Encoder
+	outputWriter     io.Writer
+	config           config.BackupConfiguration
+	encoderInterface EnvelopeEncryptionWriter
 
 	authenticatedEncryption cipher.AEAD
 	encryptedDataKey        []byte
 
-	preambleWritten   bool
-	v1PreambleWritten bool
+	encryptedDataKeyWritten bool
 }
 
 func NewEncryptor(outputWriter io.Writer, config config.BackupConfiguration) *encryptor {
 	return &encryptor{
-		outputWriter: outputWriter,
-		config: config,
-		gobEncoder: gob.NewEncoder(outputWriter),
+		outputWriter:     outputWriter,
+		config:           config,
+		encoderInterface: &pb.ProtoBufEnvelopeEncryptionWriter{},
 	}
 }
 
@@ -34,12 +33,7 @@ func (receiver *encryptor) Write(plaintext []byte) (int, error) {
 		return 0, err
 	}
 
-	err = receiver.writePreambleOnce()
-	if err != nil {
-		return 0, err
-	}
-
-	err = receiver.writeV1PreambleOnce()
+	err = receiver.writeEncryptedDataKeyOnce()
 	if err != nil {
 		return 0, err
 	}
@@ -60,12 +54,7 @@ func (receiver *encryptor) encrypt(plaintext []byte) error {
 
 	ciphertext := receiver.authenticatedEncryption.Seal(nil, nonce, plaintext, []byte(receiver.config.EncryptionContext))
 
-	messageEnvelope := &v100Envelope{
-		Nonce:      nonce,
-		CipherText: ciphertext,
-	}
-
-	err = receiver.gobEncoder.Encode(messageEnvelope)
+	err = receiver.encoderInterface.WriteEncryptedChunk(ciphertext, nonce, receiver.outputWriter)
 	return err
 }
 
@@ -104,38 +93,16 @@ func (receiver *encryptor) setUpEncryptionOnce() error {
 	return nil
 }
 
-func (receiver *encryptor) writePreambleOnce() error {
-	if receiver.preambleWritten {
+func (receiver *encryptor) writeEncryptedDataKeyOnce() error {
+	if receiver.encryptedDataKeyWritten {
 		return nil
 	}
 
-	preambleStruct := &preamble{
-		Version: PreambleVersion,
-	}
-
-	err := receiver.gobEncoder.Encode(preambleStruct)
+	err := receiver.encoderInterface.WriteEncryptedDataKey(receiver.encryptedDataKey, receiver.outputWriter)
 	if err != nil {
 		return err
 	}
 
-	receiver.preambleWritten = true
-	return nil
-}
-
-func (receiver *encryptor) writeV1PreambleOnce() error {
-	if receiver.v1PreambleWritten {
-		return nil
-	}
-
-	v1preambleStruct := &v100Preamble{
-		EncryptedDataKey: receiver.encryptedDataKey,
-	}
-
-	err := receiver.gobEncoder.Encode(v1preambleStruct)
-	if err != nil {
-		return err
-	}
-
-	receiver.v1PreambleWritten = true
+	receiver.encryptedDataKeyWritten = true
 	return nil
 }
