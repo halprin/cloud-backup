@@ -21,14 +21,17 @@ jobs:
           sudo apt install protobuf-compiler
           go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
 
-      - uses: wangyoucao577/go-release-action@v1.17
+      - uses: wangyoucao577/go-release-action@v1.20
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: "https://golang.org/dl/go1.16.linux-amd64.tar.gz"
+          goversion: 1.16
           project_path: "./cmd/"
-          pre_command: make compileProtobuf
+          pre_command: |
+            sudo apt install protobuf-compiler
+            go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
+            make compileProtobuf
           extra_files: README.md LICENSE
           md5sum: FALSE
           sha256sum: TRUE
