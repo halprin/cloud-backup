@@ -23,7 +23,7 @@ jobs:
           goarch: ${{ matrix.goarch }}
           goversion: 1.16
           project_path: "./cmd/"
-          pre_command: make installDependenciesForLinux && make compileProtobuf
+          pre_command: make installProtobufDependenciesForLinux && make compileProtobuf
           extra_files: README.md LICENSE
           md5sum: FALSE
           sha256sum: TRUE
