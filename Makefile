@@ -14,6 +14,6 @@ installDependenciesForLinux:
 #	unzip /tmp/protoc.zip -d /usr/local/
 	apt update
 	apt -y install protobuf-compiler
-	which protobuf-compiler
+	which protoc
 	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
 	which protoc-gen-go
