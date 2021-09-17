@@ -23,7 +23,7 @@ jobs:
           goarch: ${{ matrix.goarch }}
           goversion: 1.16
           project_path: "./cmd/"
-          pre_command: apt update && apt -y install protobuf-compiler && go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1 && make compileProtobuf
+          pre_command: make installDependenciesForLinux && make compileProtobuf
           extra_files: README.md LICENSE
           md5sum: FALSE
           sha256sum: TRUE
