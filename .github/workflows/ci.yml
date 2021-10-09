@@ -32,6 +32,9 @@ jobs:
     - name: Install prerequisites
       run: sudo make installProtobufDependenciesForLinux
 
+    - name: protoc-gen-go version
+      run: protoc-gen-go --version
+
     - name: Build
       run: make compile
 
