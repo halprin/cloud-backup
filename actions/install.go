@@ -19,7 +19,7 @@ var launchdId = "io.halprin.backup"
 var launchdConfigPath = filepath.Join(globalDaemons, fmt.Sprintf("%s.plist", launchdId))
 
 type templateFields struct {
-	Script    string
+	Program   string
 	ConfigYml string
 	Interval  string
 }
@@ -66,9 +66,15 @@ func writeOutLaunchdConfig(configFilePath string, month *int, day *int, weekday 
 		return err
 	}
 
+	program, err := os.Executable()
+	if err != nil {
+		program = os.Args[0]
+		log.Printf("Unable to determine program path, so using '%s'", program)
+	}
+
 	interval := constructInterval(month, day, weekday, hour, minute)
 	fields := templateFields{
-		Script:    os.Args[0],
+		Program:   program,
 		ConfigYml: configFilePath,
 		Interval:  interval,
 	}
