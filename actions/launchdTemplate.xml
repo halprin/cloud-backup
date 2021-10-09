@@ -6,6 +6,8 @@
         <string>io.halprin.backup</string>
         <key>ProgramArguments</key>
         <array>
+            <string>/usr/bin/caffeinate</string>
+            <string>-i</string>
             <string>{{.Script}}</string>
             <string>backup</string>
             <string>{{.ConfigYml}}</string>
