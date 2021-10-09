@@ -23,6 +23,12 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
+    - name: Go version
+      run: go version
+
+    - name: Sudo Go version
+      run: sudo go version
+
     - name: Install prerequisites
       run: sudo make installProtobufDependenciesForLinux
 
