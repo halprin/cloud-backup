@@ -10,8 +10,8 @@ compileProtobuf:
 		./external/pb/envelope_encryption_v100.proto
 
 installProtobufDependenciesForLinux:
-	apt update
-	apt -y install unzip
+	apt update || sudo apt update
+	apt -y install unzip || sudo apt -y install unzip
 	curl -L -o /tmp/protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
-	unzip /tmp/protoc.zip -d /usr/local/
-	go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
+	unzip -o /tmp/protoc.zip -d /usr/local/ || (sudo unzip -o /tmp/protoc.zip -d /usr/local/ && sudo chmod 777 -R /usr/local/bin/)
+	go install google.golang.org/protobuf/cmd/protoc-gen-go
