@@ -15,6 +15,5 @@ installProtobufDependenciesForLinux:
 	curl -L -o /tmp/protoc.zip https://github.com/protocolbuffers/protobuf/releases/download/v3.17.3/protoc-3.17.3-linux-x86_64.zip
 	unzip /tmp/protoc.zip -d /usr/local/
 	go version
-	#go get -u google.golang.org/protobuf/cmd/protoc-gen-go@v1.27.1
 	go install google.golang.org/protobuf/cmd/protoc-gen-go
 	protoc-gen-go --version
