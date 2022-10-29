@@ -7,7 +7,7 @@
         <key>ProgramArguments</key>
         <array>
             <string>/usr/bin/caffeinate</string>
-            <string>-i</string>
+            <string>-sim</string>
             <string>{{.Program}}</string>
             <string>backup</string>
             <string>{{.ConfigYml}}</string>
