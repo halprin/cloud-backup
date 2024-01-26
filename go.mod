@@ -6,7 +6,6 @@ require (
 	github.com/aws/aws-sdk-go v1.50.4
 	github.com/klauspost/pgzip v1.2.6
 	github.com/teris-io/cli v1.0.1
-	gopkg.in/yaml.v2 v2.2.8
 	gopkg.in/yaml.v3 v3.0.1
 )
 
