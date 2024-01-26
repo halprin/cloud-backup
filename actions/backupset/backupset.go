@@ -1,11 +1,9 @@
 package backupset
 
 import (
-	"bufio"
 	"github.com/halprin/cloud-backup/archival"
 	"github.com/halprin/cloud-backup/compression"
 	"github.com/halprin/cloud-backup/config"
-	"github.com/halprin/cloud-backup/crypt"
 	"github.com/halprin/cloud-backup/parallel"
 	"log"
 	"time"
@@ -54,11 +52,7 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 		return err
 	}
 
-	encryptor := crypt.NewEncryptor(uploader, overallConfig)
-
-	bufferedWriter := bufio.NewWriterSize(encryptor, 10 * 1024 * 1024)  //buffer in 10 MB increments
-
-	compressor := compression.NewCompressor(bufferedWriter)
+	compressor := compression.NewCompressor(uploader)
 	archiver := archival.NewArchiver(backupFile.Path, compressor.Writer(), backupFile)
 
 	err = archiver.Archive()
@@ -70,12 +64,6 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 	err = compressor.Close()
 	if err != nil {
 		log.Printf("Unable finish the compression of %s", backupFile.Title)
-		return err
-	}
-
-	err = bufferedWriter.Flush()
-	if err != nil {
-		log.Printf("Unable to finish the buffering of %s", backupFile.Title)
 		return err
 	}
 

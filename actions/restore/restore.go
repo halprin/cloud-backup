@@ -2,7 +2,7 @@ package restore
 
 import (
 	"github.com/halprin/cloud-backup/config"
-	"github.com/halprin/cloud-backup/crypt"
+	"io"
 	"log"
 	"os"
 	"path/filepath"
@@ -21,16 +21,14 @@ func Restore(configFilePath string, timestamp string, backupFile string, restore
 		return err
 	}
 
-	outputFilePath := filepath.Join(restorePath, backupFile + ".tar.gz")
+	outputFilePath := filepath.Join(restorePath, backupFile+".tar.gz")
 	outputFile, err := os.Create(outputFilePath)
 	if err != nil {
 		return err
 	}
 	defer outputFile.Close()
 
-	decryptor := crypt.NewDecryptor(sourceReader, outputFile, overallConfig)
-
-	err = decryptor.Decrypt()
+	_, err = io.Copy(outputFile, sourceReader)
 	if err != nil {
 		return err
 	}
