@@ -1,19 +1,23 @@
 package compression
 
 import (
-	"compress/gzip"
+	"github.com/klauspost/pgzip"
 	"io"
 )
 
 type compressor struct {
-	gzipWriter *gzip.Writer
+	gzipWriter *pgzip.Writer
 }
 
-func NewCompressor(outputWriter io.Writer) *compressor {
-	gzipWriter := gzip.NewWriter(outputWriter)
+func NewCompressor(outputWriter io.Writer) (*compressor, error) {
+	gzipWriter, err := pgzip.NewWriterLevel(outputWriter, pgzip.BestCompression)
+	if err != nil {
+		return nil, err
+	}
+
 	return &compressor{
 		gzipWriter: gzipWriter,
-	}
+	}, nil
 }
 
 func (receiver *compressor) Writer() io.Writer {
