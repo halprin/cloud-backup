@@ -1,4 +1,4 @@
-// +build localDesination
+//go:build localDesination
 
 package backupset
 
@@ -15,7 +15,7 @@ func getDestinationWriter(backupFile config.BackupFileConfiguration, overallConf
 		return nil, err
 	}
 
-	fullPath := filepath.Join(homeDirectory, "Desktop", overallFolderName, backupFile.Title + ".cipher")
+	fullPath := filepath.Join(homeDirectory, "Desktop", overallFolderName, backupFile.Title+".tar.gz")
 	err = ensureBaseDirExists(fullPath)
 	if err != nil {
 		return nil, err

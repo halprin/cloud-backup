@@ -1,4 +1,4 @@
-// +build localDesination
+//go:build localDesination
 
 package restore
 
@@ -15,7 +15,7 @@ func getSourceReader(overallConfig config.BackupConfiguration, timestamp string,
 		return nil, err
 	}
 
-	fullPath := filepath.Join(homeDirectory, "Desktop", timestamp, backupFile + ".cipher")
+	fullPath := filepath.Join(homeDirectory, "Desktop", timestamp, backupFile+".tar.gz")
 
 	fileReader, err := os.Open(fullPath)
 	if err != nil {

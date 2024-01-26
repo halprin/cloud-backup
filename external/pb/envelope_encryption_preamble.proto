@@ -1,8 +1,0 @@
-syntax = "proto3";
-
-option go_package = "github.com/halprin/cloud-backup/external/pb";
-
-//shows up once at the top of the file
-message Preamble {
-  string version = 1;
-}
