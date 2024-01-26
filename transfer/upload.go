@@ -29,7 +29,7 @@ func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config
 
 	uploadInput := &s3manager.UploadInput{
 		Bucket: &overallConfig.S3Bucket,
-		Key:    aws.String(path.Join(overallFolderName, fileConfig.Title + ".cipher")),
+		Key:    aws.String(path.Join(overallFolderName, fileConfig.Title+".tar.gz")),
 		Body:   pipeReader,
 	}
 

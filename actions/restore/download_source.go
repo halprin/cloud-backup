@@ -1,4 +1,4 @@
-// +build !localDesination
+//go:build !localDesination
 
 package restore
 
