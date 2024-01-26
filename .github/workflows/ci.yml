@@ -23,9 +23,6 @@ jobs:
     - name: Check out code
       uses: actions/checkout@v2
 
-    - name: Install prerequisites
-      run: make installProtobufDependenciesForLinux
-
     - name: Build
       run: make compile
 
