@@ -52,7 +52,11 @@ func backupFile(backupFile config.BackupFileConfiguration, overallConfig config.
 		return err
 	}
 
-	compressor := compression.NewCompressor(uploader)
+	compressor, err := compression.NewCompressor(uploader)
+	if err != nil {
+		return err
+	}
+
 	archiver := archival.NewArchiver(backupFile.Path, compressor.Writer(), backupFile)
 
 	err = archiver.Archive()
