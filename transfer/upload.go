@@ -2,7 +2,7 @@ package transfer
 
 import (
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	myAws "github.com/halprin/cloud-backup/aws"
 	"github.com/halprin/cloud-backup/aws/myS3Manager"
 	"github.com/halprin/cloud-backup/config"
@@ -15,7 +15,7 @@ type uploader struct {
 	pipeWriter  *io.PipeWriter
 	pipeReader  *io.PipeReader
 	s3Uploader  *myS3Manager.Uploader
-	uploadInput *s3manager.UploadInput
+	uploadInput *s3.PutObjectInput
 	waitGroup   sync.WaitGroup
 }
 
@@ -27,7 +27,7 @@ func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config
 		return nil, err
 	}
 
-	uploadInput := &s3manager.UploadInput{
+	uploadInput := &s3.PutObjectInput{
 		Bucket: &overallConfig.S3Bucket,
 		Key:    aws.String(path.Join(overallFolderName, fileConfig.Title+".tar.gz")),
 		Body:   pipeReader,

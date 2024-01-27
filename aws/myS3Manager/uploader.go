@@ -8,7 +8,6 @@ import (
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
 	"github.com/aws/aws-sdk-go-v2/service/s3/types"
-	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/halprin/cloud-backup/parallel"
 	"io"
 	"time"
@@ -27,7 +26,7 @@ func NewUploader(awsConfig aws.Config) *Uploader {
 	}
 }
 
-func (receiver *Uploader) Upload(uploadInput *s3manager.UploadInput) error {
+func (receiver *Uploader) Upload(uploadInput *s3.PutObjectInput) error {
 	dayLater := time.Now().AddDate(0, 0, 1)
 	createUploadInput := &s3.CreateMultipartUploadInput{
 		Bucket:  uploadInput.Bucket,
