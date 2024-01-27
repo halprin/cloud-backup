@@ -1,8 +1,9 @@
 package actions
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	myAws "github.com/halprin/cloud-backup/aws"
 	"github.com/halprin/cloud-backup/config"
 	"log"
@@ -30,18 +31,18 @@ func List(configFilePath string, timestamp string) error {
 func listTimestamps(overallConfig config.BackupConfiguration) error {
 	log.Println("Listing timestamps")
 
-	awsSession, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
+	awsConfig, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
 		return err
 	}
 
-	s3Client := s3.New(awsSession)
+	s3Client := s3.NewFromConfig(awsConfig)
 
 	listObjectsInput := &s3.ListObjectsV2Input{
 		Bucket:    &overallConfig.S3Bucket,
 		Delimiter: aws.String("/"),
 	}
-	listObjectsOutput, err := s3Client.ListObjectsV2(listObjectsInput)
+	listObjectsOutput, err := s3Client.ListObjectsV2(context.Background(), listObjectsInput)
 	if err != nil {
 		return err
 	}
@@ -64,18 +65,18 @@ func listTimestamps(overallConfig config.BackupConfiguration) error {
 func listBackups(overallConfig config.BackupConfiguration, timestamp string) error {
 	log.Printf("Listing backups in %s", timestamp)
 
-	awsSession, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
+	awsConfig, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
 		return err
 	}
 
-	s3Client := s3.New(awsSession)
+	s3Client := s3.NewFromConfig(awsConfig)
 
 	listObjectsInput := &s3.ListObjectsV2Input{
 		Bucket: &overallConfig.S3Bucket,
 		Prefix: &timestamp,
 	}
-	listObjectsOutput, err := s3Client.ListObjectsV2(listObjectsInput)
+	listObjectsOutput, err := s3Client.ListObjectsV2(context.Background(), listObjectsInput)
 	if err != nil {
 		return err
 	}
