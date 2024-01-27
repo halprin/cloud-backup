@@ -1,9 +1,9 @@
 package aws
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
+	"context"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/config"
 	"log"
 	"path/filepath"
 )
@@ -11,25 +11,23 @@ import (
 const credentialFile = "credentials"
 const configFile = "config"
 
-func GetSession(awsCredentialConfigPath string, awsProfile string) (*session.Session, error) {
-	options := session.Options{
-		SharedConfigState: session.SharedConfigEnable,
-		Profile:           awsProfile,
+func GetConfig(awsCredentialConfigPath string, awsProfile string) (aws.Config, error) {
+
+	cfgOptions := []func(*config.LoadOptions) error{
+		config.WithSharedConfigProfile(awsProfile),
 	}
 
 	if awsCredentialConfigPath != "" {
-		options.Config = aws.Config{
-			Credentials: credentials.NewSharedCredentials(filepath.Join(awsCredentialConfigPath, credentialFile), awsProfile),
-		}
-		options.SharedConfigFiles = []string{filepath.Join(awsCredentialConfigPath, configFile)}
+		cfgOptions = append(cfgOptions, config.WithSharedCredentialsFiles([]string{filepath.Join(awsCredentialConfigPath, credentialFile)}))
+		cfgOptions = append(cfgOptions, config.WithSharedConfigFiles([]string{filepath.Join(awsCredentialConfigPath, configFile)}))
 	}
 
-	awsSession, err := session.NewSessionWithOptions(options)
+	cfg, err := config.LoadDefaultConfig(context.Background(), cfgOptions...)
 
 	if err != nil {
-		log.Println("Initial AWS session failed")
-		return nil, err
+		log.Println("Initial AWS config failed")
+		return aws.Config{}, err
 	}
 
-	return awsSession, nil
+	return cfg, nil
 }

@@ -15,7 +15,7 @@ type downloader struct {
 }
 
 func NewDownloader(overallConfig config.BackupConfiguration, timestamp string, backupFile string) (*downloader, error) {
-	awsSession, err := myAws.GetSession(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
+	awsSession, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
 		return nil, err
 	}

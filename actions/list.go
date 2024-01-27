@@ -30,7 +30,7 @@ func List(configFilePath string, timestamp string) error {
 func listTimestamps(overallConfig config.BackupConfiguration) error {
 	log.Println("Listing timestamps")
 
-	awsSession, err := myAws.GetSession(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
+	awsSession, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
 		return err
 	}
@@ -54,7 +54,7 @@ func listTimestamps(overallConfig config.BackupConfiguration) error {
 	}
 
 	for _, prefix := range prefixes {
-		prefixSansSlash := (*prefix.Prefix)[0:len(*prefix.Prefix) - 1]
+		prefixSansSlash := (*prefix.Prefix)[0 : len(*prefix.Prefix)-1]
 		log.Printf("- %s", prefixSansSlash)
 	}
 
@@ -64,7 +64,7 @@ func listTimestamps(overallConfig config.BackupConfiguration) error {
 func listBackups(overallConfig config.BackupConfiguration, timestamp string) error {
 	log.Printf("Listing backups in %s", timestamp)
 
-	awsSession, err := myAws.GetSession(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
+	awsSession, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
 		return err
 	}

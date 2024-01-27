@@ -2,11 +2,13 @@ package myS3Manager
 
 import (
 	"bytes"
+	"context"
 	"crypto/md5"
 	"encoding/base64"
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/client"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
+	//"github.com/aws/aws-sdk-go/service/s3"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	"github.com/halprin/cloud-backup/parallel"
 	"io"
@@ -14,13 +16,13 @@ import (
 )
 
 type Uploader struct {
-	s3Client            *s3.S3
+	s3Client            *s3.Client
 	body                io.Reader
 	multipartUploadData *s3.CreateMultipartUploadOutput
 }
 
-func NewUploader(session client.ConfigProvider) *Uploader {
-	s3Client := s3.New(session)
+func NewUploader(awsConfig aws.Config) *Uploader {
+	s3Client := s3.NewFromConfig(awsConfig)
 	return &Uploader{
 		s3Client: s3Client,
 	}
@@ -29,14 +31,14 @@ func NewUploader(session client.ConfigProvider) *Uploader {
 func (receiver *Uploader) Upload(uploadInput *s3manager.UploadInput) error {
 	dayLater := time.Now().AddDate(0, 0, 1)
 	createUploadInput := &s3.CreateMultipartUploadInput{
-		Bucket: uploadInput.Bucket,
-		Key:    uploadInput.Key,
+		Bucket:  uploadInput.Bucket,
+		Key:     uploadInput.Key,
 		Expires: &dayLater,
 	}
 
 	receiver.body = uploadInput.Body
 
-	createUploadOutput, err := receiver.s3Client.CreateMultipartUpload(createUploadInput)
+	createUploadOutput, err := receiver.s3Client.CreateMultipartUpload(context.Background(), createUploadInput)
 	if err != nil {
 		return err
 	}
@@ -57,11 +59,11 @@ func (receiver *Uploader) Upload(uploadInput *s3manager.UploadInput) error {
 	return nil
 }
 
-func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
-	partSize := int64(5 * 1024 * 1024)  //start at 5 MB
+func (receiver *Uploader) uploadAllTheParts() ([]types.CompletedPart, error) {
+	partSize := int64(5 * 1024 * 1024) //start at 5 MB
 	numberOfIterationsPerPartSize := 909
-	partNumber := int64(1)
-	var completedPartChannels []chan *s3.CompletedPart
+	partNumber := int32(1)
+	var completedPartChannels []chan types.CompletedPart
 	var errorChannels []chan error
 
 	poolSize := 5
@@ -69,7 +71,7 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 	pool := parallel.NewPool(poolSize, taskQueueSize)
 	defer pool.Release()
 
-	for ; ; partSize*=2 {
+	for ; ; partSize *= 2 {
 		for partIndex := 0; partIndex < numberOfIterationsPerPartSize; partIndex++ {
 
 			partBytes, err := receiver.readPart(partSize)
@@ -87,7 +89,7 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 			}
 
 			//check upload errors every taskQueueSize times
-			if partNumber % int64(taskQueueSize) == 0 {
+			if partNumber%int32(taskQueueSize) == 0 {
 				err := returnFirstErrorInSlice(parallel.ConvertChannelsOfErrorToErrorSlice(errorChannels))
 				if err != nil {
 					return nil, err
@@ -97,10 +99,10 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 
 			errorChannel := make(chan error, 1)
 			errorChannels = append(errorChannels, errorChannel)
-			completedPartChannel := make(chan *s3.CompletedPart, 1)
+			completedPartChannel := make(chan types.CompletedPart, 1)
 			completedPartChannels = append(completedPartChannels, completedPartChannel)
 
-			func(partBytes []byte, partNumber int64, completedPartChannel chan *s3.CompletedPart, errorChannel chan error) {
+			func(partBytes []byte, partNumber int32, completedPartChannel chan types.CompletedPart, errorChannel chan error) {
 				pool.Submit(func() {
 					completedPart, err := receiver.uploadPart(partBytes, partNumber)
 					if err != nil {
@@ -113,7 +115,7 @@ func (receiver *Uploader) uploadAllTheParts() ([]*s3.CompletedPart, error) {
 					close(errorChannel)
 					close(completedPartChannel)
 				})
-			}(partBytes, partNumber, completedPartChannel, errorChannel)  //copy partBytes and partNumber so it is unique for the closure
+			}(partBytes, partNumber, completedPartChannel, errorChannel) //copy partBytes and partNumber so it is unique for the closure
 
 			partNumber++
 		}
@@ -124,7 +126,7 @@ func (receiver *Uploader) readPart(partSize int64) ([]byte, error) {
 	//read up to partSize amount of bytes
 	fullPartBytes := make([]byte, partSize)
 
-	partBytesRead, err := io.ReadFull(receiver.body, fullPartBytes)  //ReadFull to try to fill the full size of partSize
+	partBytesRead, err := io.ReadFull(receiver.body, fullPartBytes) //ReadFull to try to fill the full size of partSize
 	if err != nil && err != io.ErrUnexpectedEOF {
 		return nil, err
 	}
@@ -135,7 +137,7 @@ func (receiver *Uploader) readPart(partSize int64) ([]byte, error) {
 	return partBytes, nil
 }
 
-func (receiver *Uploader) uploadPart(partBytes []byte, partNumber int64) (*s3.CompletedPart, error) {
+func (receiver *Uploader) uploadPart(partBytes []byte, partNumber int32) (types.CompletedPart, error) {
 	md5Hash := calculateMd5Hash(partBytes)
 
 	partInput := &s3.UploadPartInput{
@@ -148,28 +150,28 @@ func (receiver *Uploader) uploadPart(partBytes []byte, partNumber int64) (*s3.Co
 		UploadId:      receiver.multipartUploadData.UploadId,
 	}
 
-	partOutput, err := receiver.s3Client.UploadPart(partInput)
+	partOutput, err := receiver.s3Client.UploadPart(context.Background(), partInput)
 	if err != nil {
-		return nil, err
+		return types.CompletedPart{}, err
 	}
 
-	return &s3.CompletedPart{
+	return types.CompletedPart{
 		ETag:       partOutput.ETag,
 		PartNumber: &partNumber,
 	}, nil
 }
 
-func (receiver *Uploader) finishMultipartUpload(completedParts []*s3.CompletedPart) error {
+func (receiver *Uploader) finishMultipartUpload(completedParts []types.CompletedPart) error {
 	completeUploadInput := &s3.CompleteMultipartUploadInput{
-		Bucket:          receiver.multipartUploadData.Bucket,
-		Key:             receiver.multipartUploadData.Key,
-		UploadId:        receiver.multipartUploadData.UploadId,
-		MultipartUpload: &s3.CompletedMultipartUpload{
+		Bucket:   receiver.multipartUploadData.Bucket,
+		Key:      receiver.multipartUploadData.Key,
+		UploadId: receiver.multipartUploadData.UploadId,
+		MultipartUpload: &types.CompletedMultipartUpload{
 			Parts: completedParts,
 		},
 	}
 
-	_, err := receiver.s3Client.CompleteMultipartUpload(completeUploadInput)
+	_, err := receiver.s3Client.CompleteMultipartUpload(context.Background(), completeUploadInput)
 	if err != nil {
 		return err
 	}
@@ -184,7 +186,7 @@ func (receiver *Uploader) stopMultipartUpload() {
 		UploadId: receiver.multipartUploadData.UploadId,
 	}
 
-	_, _ = receiver.s3Client.AbortMultipartUpload(abortUploadInput)
+	_, _ = receiver.s3Client.AbortMultipartUpload(context.Background(), abortUploadInput)
 	//swallow error because we are stopping because there was already an error and that is more important to report
 }
 

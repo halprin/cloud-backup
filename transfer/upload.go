@@ -1,7 +1,7 @@
 package transfer
 
 import (
-	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go/service/s3/s3manager"
 	myAws "github.com/halprin/cloud-backup/aws"
 	"github.com/halprin/cloud-backup/aws/myS3Manager"
@@ -68,12 +68,12 @@ func (receiver *uploader) initiateUpload() {
 }
 
 func getUploader(overallConfig config.BackupConfiguration) (*myS3Manager.Uploader, error) {
-	awsSession, err := myAws.GetSession(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
+	awsConfig, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
 		return nil, err
 	}
 
-	newUploader := myS3Manager.NewUploader(awsSession)
+	newUploader := myS3Manager.NewUploader(awsConfig)
 
 	return newUploader, nil
 }
