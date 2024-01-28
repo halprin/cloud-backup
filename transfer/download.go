@@ -1,21 +1,22 @@
 package transfer
 
 import (
+	"context"
 	"fmt"
-	"github.com/aws/aws-sdk-go/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3"
 	myAws "github.com/halprin/cloud-backup/aws"
 	"github.com/halprin/cloud-backup/config"
 	"io"
 )
 
 type downloader struct {
-	s3Client    *s3.S3
+	s3Client    *s3.Client
 	s3Bucket    string
 	s3ObjectKey string
 }
 
 func NewDownloader(overallConfig config.BackupConfiguration, timestamp string, backupFile string) (*downloader, error) {
-	awsSession, err := myAws.GetSession(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
+	awsConfig, err := myAws.GetConfig(overallConfig.AwsCredentialConfigPath, overallConfig.AwsProfile)
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +24,7 @@ func NewDownloader(overallConfig config.BackupConfiguration, timestamp string, b
 	s3ObjectKey := fmt.Sprintf("%s/%s", timestamp, backupFile)
 
 	return &downloader{
-		s3Client:    s3.New(awsSession),
+		s3Client:    s3.NewFromConfig(awsConfig),
 		s3Bucket:    overallConfig.S3Bucket,
 		s3ObjectKey: s3ObjectKey,
 	}, nil
@@ -35,7 +36,7 @@ func (receiver *downloader) Download() (io.Reader, error) {
 		Key:    &receiver.s3ObjectKey,
 	}
 
-	getObjectOutput, err := receiver.s3Client.GetObject(getObjectInput)
+	getObjectOutput, err := receiver.s3Client.GetObject(context.Background(), getObjectInput)
 	if err != nil {
 		return nil, err
 	}
