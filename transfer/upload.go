@@ -1,8 +1,10 @@
 package transfer
 
 import (
+	"encoding/base64"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3"
+	"github.com/aws/aws-sdk-go-v2/service/s3/types"
 	myAws "github.com/halprin/cloud-backup/aws"
 	"github.com/halprin/cloud-backup/aws/myS3Manager"
 	"github.com/halprin/cloud-backup/config"
@@ -31,6 +33,12 @@ func NewUploader(fileConfig config.BackupFileConfiguration, overallConfig config
 		Bucket: &overallConfig.S3Bucket,
 		Key:    aws.String(path.Join(overallFolderName, fileConfig.Title+".tar.gz")),
 		Body:   pipeReader,
+	}
+
+	if overallConfig.KmsKey != "" {
+		uploadInput.ServerSideEncryption = types.ServerSideEncryptionAwsKms
+		uploadInput.SSEKMSKeyId = &overallConfig.KmsKey
+		uploadInput.SSEKMSEncryptionContext = aws.String(base64.StdEncoding.EncodeToString([]byte(overallConfig.EncryptionContext)))
 	}
 
 	newUploader := &uploader{

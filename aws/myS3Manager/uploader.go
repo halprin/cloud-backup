@@ -29,9 +29,12 @@ func NewUploader(awsConfig aws.Config) *Uploader {
 func (receiver *Uploader) Upload(uploadInput *s3.PutObjectInput) error {
 	dayLater := time.Now().AddDate(0, 0, 1)
 	createUploadInput := &s3.CreateMultipartUploadInput{
-		Bucket:  uploadInput.Bucket,
-		Key:     uploadInput.Key,
-		Expires: &dayLater,
+		Bucket:                  uploadInput.Bucket,
+		Key:                     uploadInput.Key,
+		Expires:                 &dayLater,
+		ServerSideEncryption:    uploadInput.ServerSideEncryption,
+		SSEKMSKeyId:             uploadInput.SSEKMSKeyId,
+		SSEKMSEncryptionContext: uploadInput.SSEKMSEncryptionContext,
 	}
 
 	receiver.body = uploadInput.Body
