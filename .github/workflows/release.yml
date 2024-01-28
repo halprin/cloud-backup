@@ -17,12 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: wangyoucao577/go-release-action@v1.43
+      - uses: wangyoucao577/go-release-action@v1.45
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           goos: ${{ matrix.goos }}
           goarch: ${{ matrix.goarch }}
-          goversion: 1.21
+          goversion: go.mod
           project_path: "./cmd/"
           extra_files: README.md LICENSE
           md5sum: FALSE
