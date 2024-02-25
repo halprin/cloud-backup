@@ -5,7 +5,7 @@ go 1.22
 require (
 	github.com/aws/aws-sdk-go-v2 v1.25.2
 	github.com/aws/aws-sdk-go-v2/config v1.27.4
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.50.3
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.51.0
 	github.com/klauspost/pgzip v1.2.6
 	github.com/teris-io/cli v1.0.1
 	gopkg.in/yaml.v3 v3.0.1
