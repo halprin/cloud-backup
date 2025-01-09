@@ -27,16 +27,16 @@ jobs:
 
       - uses: halprin/macos-sign-package-notarize@v1
         with:
-          path-to-binary: ./evn-pilot-conversion
+          path-to-binary: ./cloud-backup
           signing-identity: ${{ secrets.SIGNING_IDENTITY }}
           apple-id: ${{ secrets.APPLE_ID }}
           app-specific-password: ${{ secrets.APP_SPECIFIC_PASSWORD }}
           apple-developer-team-id: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
           extra-files: README.md LICENSE
-          archive-disk-name: EVN Pilot Conversion
-          archive-file-path: ./evn-pilot-conversion.dmg
+          archive-disk-name: Cloud Backup
+          archive-file-path: ./cloud-backup.dmg
 
       - name: Upload Release Asset
-        run: gh release upload ${{ github.event.release.tag_name }} ./evn-pilot-conversion.dmg --clobber
+        run: gh release upload ${{ github.event.release.tag_name }} ./cloud-backup.dmg --clobber
         env:
           GH_TOKEN: ${{ github.token }}
