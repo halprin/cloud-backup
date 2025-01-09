@@ -6,6 +6,10 @@ on:
       - published
 
 
+permissions:
+  contents: write
+
+
 jobs:
   releases-matrix:
     name: Release Go Binaries
