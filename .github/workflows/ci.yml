@@ -21,8 +21,11 @@ jobs:
       with:
         go-version-file: go.mod
 
-    - name: Build
-      run: make compile
+    - name: Build for ARM64
+      run: make compile-arm64
+
+    - name: Build for AMD64
+      run: make compile-amd64
 
     - name: Build Local Test
       run: make compileLocal

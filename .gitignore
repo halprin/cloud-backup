@@ -4,8 +4,7 @@
 *.dll
 *.so
 *.dylib
-/cloud-backup
-/cloud-backup-local
+/cloud-backup*
 
 # Test binary, built with `go test -c`
 *.test
