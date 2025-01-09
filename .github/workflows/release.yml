@@ -34,9 +34,9 @@ jobs:
           apple-developer-team-id: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
           extra-files: README.md LICENSE
           archive-disk-name: Cloud Backup
-          archive-file-path: ./cloud-backup.dmg
+          archive-file-path: ./cloud-backup-${{ github.event.release.tag_name }}.dmg
 
       - name: Upload Release Asset
-        run: gh release upload ${{ github.event.release.tag_name }} ./cloud-backup.dmg --clobber
+        run: gh release upload ${{ github.event.release.tag_name }} ./cloud-backup-${{ github.event.release.tag_name }}.dmg --clobber
         env:
           GH_TOKEN: ${{ github.token }}
