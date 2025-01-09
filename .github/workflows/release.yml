@@ -9,22 +9,34 @@ on:
 jobs:
   releases-matrix:
     name: Release Go Binaries
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        goos: [darwin]
-        goarch: [amd64, arm64]
+    runs-on: macos-latest
     steps:
 
       - uses: actions/checkout@v4
 
-      - uses: wangyoucao577/go-release-action@v1.53
+      - uses: actions/setup-go@v5
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          goos: ${{ matrix.goos }}
-          goarch: ${{ matrix.goarch }}
-          goversion: go.mod
-          project_path: "./cmd/"
-          extra_files: README.md LICENSE
-          md5sum: FALSE
-          sha256sum: TRUE
+          go-version-file: go.mod
+
+      - run: make compile
+
+      - uses: apple-actions/import-codesign-certs@v3
+        with:
+          p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
+          p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
+
+      - uses: halprin/macos-sign-package-notarize@v1
+        with:
+          path-to-binary: ./evn-pilot-conversion
+          signing-identity: ${{ secrets.SIGNING_IDENTITY }}
+          apple-id: ${{ secrets.APPLE_ID }}
+          app-specific-password: ${{ secrets.APP_SPECIFIC_PASSWORD }}
+          apple-developer-team-id: ${{ secrets.APPLE_DEVELOPER_TEAM_ID }}
+          extra-files: README.md LICENSE
+          archive-disk-name: EVN Pilot Conversion
+          archive-file-path: ./evn-pilot-conversion.dmg
+
+      - name: Upload Release Asset
+        run: gh release upload ${{ github.event.release.tag_name }} ./evn-pilot-conversion.dmg --clobber
+        env:
+          GH_TOKEN: ${{ github.token }}
