@@ -7,7 +7,7 @@ toolchain go1.25.5
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.0
 	github.com/aws/aws-sdk-go-v2/config v1.32.6
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.94.0
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.95.0
 	github.com/klauspost/pgzip v1.2.6
 	github.com/teris-io/cli v1.0.1
 	gopkg.in/yaml.v3 v3.0.1
