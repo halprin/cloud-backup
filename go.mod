@@ -6,7 +6,7 @@ toolchain go1.26.2
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.41.5
-	github.com/aws/aws-sdk-go-v2/config v1.32.14
+	github.com/aws/aws-sdk-go-v2/config v1.32.15
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.99.0
 	github.com/klauspost/pgzip v1.2.6
 	github.com/teris-io/cli v1.0.1
