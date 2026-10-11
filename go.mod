@@ -1,14 +1,14 @@
 module github.com/halprin/cloud-backup
 
-go 1.24
+go 1.25
 
-toolchain go1.27.1
+toolchain go1.27.2
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.47.3
 	github.com/aws/aws-sdk-go-v2/config v1.33.9
 	github.com/aws/aws-sdk-go-v2/service/s3 v1.114.3
-	github.com/klauspost/pgzip v1.2.6
+	github.com/klauspost/pgzip v1.2.7
 	github.com/teris-io/cli v1.0.1
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -30,5 +30,5 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.43.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.51.4 // indirect
 	github.com/aws/smithy-go v1.28.5 // indirect
-	github.com/klauspost/compress v1.17.4 // indirect
+	github.com/klauspost/compress v1.20.1 // indirect
 )
